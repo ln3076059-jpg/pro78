@@ -1,0 +1,183 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+    --primary-color: #0284c7;
+    --primary-hover: #0369a1;
+    --primary-gradient: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+    --accent-color: #0d9488;
+    --dark-bg: #0f172a;
+    --sidebar-bg: #1e293b;
+    --sidebar-hover: #334155;
+    --card-bg: #ffffff;
+    --border-color: #e2e8f0;
+    --text-primary: #1e293b;
+    --text-muted: #64748b;
+    --badge-support: #3b82f6;
+    --badge-confidence: #10b981;
+    --badge-lift: #8b5cf6;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background-color: #f8fafc;
+    color: var(--text-primary);
+    min-height: 100vh;
+}
+
+/* Sidebar Styling */
+.sidebar {
+    background-color: var(--sidebar-bg);
+    min-height: 100vh;
+    color: #f1f5f9;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+    z-index: 1000;
+}
+
+.sidebar .brand-title {
+    font-weight: 700;
+    font-size: 1.15rem;
+    letter-spacing: -0.5px;
+    color: #38bdf8;
+    padding: 1.25rem 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.sidebar .nav-link {
+    color: #cbd5e1;
+    font-weight: 500;
+    font-size: 0.92rem;
+    padding: 0.65rem 1rem;
+    border-radius: 0.5rem;
+    margin: 0.2rem 0.5rem;
+    transition: all 0.2s ease-in-out;
+    display: flex;
+    align-items: center;
+}
+
+.sidebar .nav-link i {
+    width: 24px;
+    font-size: 1rem;
+    margin-right: 0.5rem;
+}
+
+.sidebar .nav-link:hover {
+    color: #ffffff;
+    background-color: var(--sidebar-hover);
+    transform: translateX(4px);
+}
+
+.sidebar .nav-link.active {
+    color: #ffffff;
+    background: var(--primary-gradient);
+    box-shadow: 0 4px 12px rgba(2, 132, 199, 0.35);
+}
+
+.sidebar-heading {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 700;
+    color: #94a3b8;
+    padding: 0.75rem 1.25rem 0.25rem;
+}
+
+/* Top Navbar */
+.top-navbar {
+    background-color: #ffffff;
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+/* Metric Cards */
+.metric-card {
+    background: #ffffff;
+    border-radius: 0.85rem;
+    border: 1px solid var(--border-color);
+    padding: 1.25rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.metric-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.04);
+}
+
+.metric-icon-box {
+    width: 48px;
+    height: 48px;
+    border-radius: 0.65rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+}
+
+/* Recommendation Box (Doctor Co-prescription) */
+.recommendation-panel {
+    background: linear-gradient(145deg, #f0fdf4 0%, #e0f2fe 100%);
+    border: 1px solid #bbf7d0;
+    border-radius: 0.85rem;
+    padding: 1.25rem;
+}
+
+.recommendation-item {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.65rem;
+    padding: 0.85rem 1rem;
+    margin-bottom: 0.75rem;
+    transition: all 0.2s ease;
+}
+
+.recommendation-item:hover {
+    border-color: #0284c7;
+    box-shadow: 0 4px 12px rgba(2, 132, 199, 0.1);
+}
+
+/* Badges */
+.badge-support {
+    background-color: #e0f2fe;
+    color: #0284c7;
+    font-weight: 600;
+    border: 1px solid #bae6fd;
+}
+
+.badge-confidence {
+    background-color: #dcfce7;
+    color: #15803d;
+    font-weight: 600;
+    border: 1px solid #bbf7d0;
+}
+
+.badge-lift {
+    background-color: #f3e8ff;
+    color: #7e22ce;
+    font-weight: 600;
+    border: 1px solid #e9d5ff;
+}
+
+/* Clinical Alert */
+.clinical-alert {
+    background-color: #fef3c7;
+    border-left: 4px solid #f59e0b;
+    color: #92400e;
+    font-size: 0.85rem;
+    padding: 0.75rem 1rem;
+    border-radius: 0.35rem;
+}
+
+/* Tables */
+.table th {
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    background-color: #f8fafc;
+    border-top: none;
+}
+
+.table td {
+    vertical-align: middle;
+    font-size: 0.92rem;
+}

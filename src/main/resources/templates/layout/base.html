@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      lang="vi">
+<head th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title} + ' - Hệ Thống Bệnh Viện &amp; Data Mining'">Hệ Thống Bệnh Viện &amp; Data Mining</title>
+    <!-- Bootstrap 5.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome 6 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link th:href="@{/css/custom-style.css}" rel="stylesheet">
+</head>
+<body>
+
+<div class="container-fluid p-0">
+    <div class="row g-0">
+        <!-- Sidebar Navigation -->
+        <nav th:fragment="sidebar" class="col-md-3 col-lg-2 sidebar d-md-block p-0">
+            <div class="d-flex flex-column h-100">
+                <div class="brand-title d-flex align-items-center gap-2">
+                    <i class="fas fa-hospital-alt fs-4 text-info"></i>
+                    <div>
+                        <div class="fw-bold lh-1 text-white">MediMining</div>
+                        <small class="text-secondary" style="font-size: 0.7rem;">Hospital &amp; Data Mining</small>
+                    </div>
+                </div>
+
+                <ul class="nav flex-column mt-3 mb-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/dashboard}">
+                            <i class="fas fa-chart-pie"></i> Tổng quan (Dashboard)
+                        </a>
+                    </li>
+
+                    <div class="sidebar-heading">Nghiệp vụ Lâm Sàng</div>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/patients}">
+                            <i class="fas fa-user-injured"></i> Bệnh nhân
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/visits}">
+                            <i class="fas fa-stethoscope"></i> Ca khám bệnh
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/medicines}">
+                            <i class="fas fa-pills"></i> Danh mục Thuốc
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/prescriptions/create}">
+                            <i class="fas fa-prescription-bottle-alt"></i> Kê đơn thuốc (AI/DM)
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/prescriptions}">
+                            <i class="fas fa-file-prescription"></i> Lịch sử đơn thuốc
+                        </a>
+                    </li>
+
+                    <div class="sidebar-heading">Data Mining (UCI Diabetes)</div>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/mining/dataset}">
+                            <i class="fas fa-database"></i> Quản lý Dataset
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/mining/preprocess}">
+                            <i class="fas fa-filter"></i> Tiền xử lý (ETL)
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/mining/transactions}">
+                            <i class="fas fa-receipt"></i> Giao dịch (Transactions)
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/mining/apriori}">
+                            <i class="fas fa-brain"></i> Khai phá Apriori
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/mining/fpgrowth}">
+                            <i class="fas fa-project-diagram"></i> Khai phá FP-Growth
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/mining/itemsets}">
+                            <i class="fas fa-cubes"></i> Frequent Itemsets
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/mining/rules}">
+                            <i class="fas fa-project-diagram"></i> Association Rules
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/mining/benchmark}">
+                            <i class="fas fa-balance-scale"></i> So sánh &amp; Benchmark
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/mining/history}">
+                            <i class="fas fa-history"></i> Lịch sử khai phá
+                        </a>
+                    </li>
+                </ul>
+
+                <div class="p-3 border-top border-secondary">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="text-truncate me-2">
+                            <small class="text-muted d-block" style="font-size: 0.72rem;">Đang đăng nhập:</small>
+                            <span class="fw-bold text-white small" sec:authentication="name">User</span>
+                        </div>
+                        <form th:action="@{/logout}" method="post" class="m-0">
+                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Đăng xuất">
+                                <i class="fas fa-sign-out-alt"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Body -->
+        <main class="col-md-9 col-lg-10 ms-sm-auto px-md-4 py-3">
+            <!-- Top Navbar -->
+            <div th:fragment="topbar" class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                <h4 class="h5 text-primary fw-bold mb-0">
+                    <span th:text="${pageTitle}">Tiêu đề trang</span>
+                </h4>
+                <div class="btn-toolbar mb-2 mb-md-0 gap-2">
+                    <a th:href="@{/prescriptions/create}" class="btn btn-sm btn-primary">
+                        <i class="fas fa-plus me-1"></i> Tạo đơn thuốc mới
+                    </a>
+                    <a th:href="@{/mining/benchmark}" class="btn btn-sm btn-outline-secondary">
+                        <i class="fas fa-chart-line me-1"></i> Xem Benchmark
+                    </a>
+                </div>
+            </div>
+
+            <!-- Flash Alerts -->
+            <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle me-1"></i> <span th:text="${successMessage}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-triangle me-1"></i> <span th:text="${errorMessage}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- Scripts -->
+<div th:fragment="scripts">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+</div>
+
+</body>
+</html>

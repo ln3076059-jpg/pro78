@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head th:replace="~{layout/base :: head('So Sánh &amp; Benchmark Thuật Toán')}"></head>
+<body>
+
+<div class="container-fluid p-0">
+    <div class="row g-0">
+        <nav th:replace="~{layout/base :: sidebar}"></nav>
+
+        <main class="col-md-9 col-lg-10 ms-sm-auto px-md-4 py-3">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                <h4 class="h5 text-primary fw-bold mb-0">Thực Nghiệm Đo Lường &amp; So Sánh Thuật Toán (Apriori vs FP-Growth)</h4>
+            </div>
+
+            <!-- Form cấu hình kiểm thử Benchmark -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white py-3">
+                    <h6 class="card-title mb-0 fw-bold text-secondary">
+                        <i class="fas fa-flask text-primary me-2"></i> Thiết Lập Môi Trường Benchmark Trên Cùng Một Bộ Dữ Liệu
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/mining/benchmark}" method="get" class="row g-3 align-items-end">
+                        <div class="col-md-3">
+                            <label class="form-label small fw-semibold">minSupport Kiểm Thử:</label>
+                            <input type="number" step="0.01" min="0.01" max="1.0" name="minSupport" th:value="${minSupport}" class="form-control" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small fw-semibold">minConfidence Kiểm Thử:</label>
+                            <input type="number" step="0.05" min="0.1" max="1.0" name="minConfidence" th:value="${minConfidence}" class="form-control" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label small fw-semibold">minLift Kiểm Thử:</label>
+                            <input type="number" step="0.1" min="0.0" name="minLift" th:value="${minLift}" class="form-control" required>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-primary flex-grow-1">
+                                    <i class="fas fa-play me-1"></i> Benchmark Đơn
+                                </button>
+                                <a th:href="@{/mining/export/benchmark}" class="btn btn-success" title="Tải kết quả Benchmark CSV">
+                                    <i class="fas fa-file-csv"></i> CSV
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                    <div class="mt-3 pt-3 border-top d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <small class="text-muted"><i class="fas fa-info-circle me-1"></i> Khuyến nghị thực nghiệm: Chạy benchmark trên một loạt ngưỡng support để so sánh độ co giãn thuật toán.</small>
+                        <form th:action="@{/mining/benchmark/multi}" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-layer-group me-1"></i> Chạy Suite Đa Ngưỡng (5%, 10%, 15%)
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bảng So Sánh Thực Nghiệm Hiện Tại (Section 7) -->
+            <div class="card shadow-sm border-0 mb-4" th:if="${currentComparison != null}">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="card-title mb-0 fw-bold text-secondary">
+                        <i class="fas fa-table text-success me-2"></i> Kết Quả Chạy Thực Nghiệm Thực Tế (Không Hard-code)
+                    </h6>
+                    <span class="badge bg-light text-dark border">Dataset: <span th:text="${currentComparison.datasetName}">Demo</span></span>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-bordered align-middle text-center mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Algorithm</th>
+                                <th>Transactions</th>
+                                <th>Min Support</th>
+                                <th>Runtime (Thời gian)</th>
+                                <th>Frequent Itemsets</th>
+                                <th>Rules Sinh Ra</th>
+                                <th>Bộ Nhớ Đo Được</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="fw-bold text-danger">Apriori</td>
+                                <td th:text="${currentComparison.transactionCount}">20</td>
+                                <td th:text="${#numbers.formatDecimal(currentComparison.minSupport * 100, 1, 0) + '%'}">10%</td>
+                                <td>
+                                    <span class="badge bg-danger-subtle text-danger fs-6" th:text="${currentComparison.aprioriRuntimeMs + ' ms'}">15 ms</span>
+                                </td>
+                                <td th:text="${currentComparison.aprioriItemsetCount}">8</td>
+                                <td th:text="${currentComparison.aprioriRuleCount}">12</td>
+                                <td th:text="${currentComparison.aprioriMemoryMb + ' MB'}">0.5 MB</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold text-success">FP-Growth</td>
+                                <td th:text="${currentComparison.transactionCount}">20</td>
+                                <td th:text="${#numbers.formatDecimal(currentComparison.minSupport * 100, 1, 0) + '%'}">10%</td>
+                                <td>
+                                    <span class="badge bg-success-subtle text-success fs-6" th:text="${currentComparison.fpgrowthRuntimeMs + ' ms'}">8 ms</span>
+                                </td>
+                                <td th:text="${currentComparison.fpgrowthItemsetCount}">8</td>
+                                <td th:text="${currentComparison.fpgrowthRuleCount}">12</td>
+                                <td th:text="${currentComparison.fpgrowthMemoryMb + ' MB'}">0.4 MB</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="card-footer bg-white p-3">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <div>
+                            <i class="fas fa-check-double text-success me-1"></i>
+                            <strong>Độ ổn định / tương đồng tập luật (Rule Overlap):</strong>
+                            <span class="badge bg-success" th:text="${currentComparison.ruleOverlapPercentage + '%'}">100%</span>
+                        </div>
+                        <div>
+                            <strong>Thuật toán khuyến nghị:</strong>
+                            <span class="badge bg-primary fs-6" th:text="${currentComparison.recommendedAlgorithm}">FP-Growth</span>
+                        </div>
+                    </div>
+                    <div class="p-3 bg-light rounded text-muted small">
+                        <strong>Căn cứ khoa học &amp; Kết luận:</strong>
+                        <p class="mb-0 mt-1" th:text="${currentComparison.conclusionNotes}">
+                            FP-Growth vượt trội về thời gian chạy do không phải sinh ứng viên candidate (k-itemset)...
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lịch sử Benchmark -->
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white py-3">
+                    <h6 class="card-title mb-0 fw-bold text-secondary">
+                        <i class="fas fa-history text-secondary me-2"></i> Nhật Ký Các Lần Thực Nghiệm Benchmark Đã Lưu
+                    </h6>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Tên Thực Nghiệm</th>
+                                <th>Transactions</th>
+                                <th>minSupport</th>
+                                <th>Apriori Runtime</th>
+                                <th>FP-Growth Runtime</th>
+                                <th>Chênh Lệch</th>
+                                <th>Overlap</th>
+                                <th>Khuyến Nghị</th>
+                                <th>Thời Gian</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="bm : ${benchmarks}">
+                                <td><strong th:text="${bm.benchmarkName}">Benchmark 1</strong></td>
+                                <td th:text="${bm.transactionCount}">20</td>
+                                <td th:text="${#numbers.formatDecimal(bm.minSupport * 100, 1, 0) + '%'}">10%</td>
+                                <td class="text-danger fw-semibold" th:text="${bm.aprioriRuntimeMs + ' ms'}">15 ms</td>
+                                <td class="text-success fw-semibold" th:text="${bm.fpgrowthRuntimeMs + ' ms'}">8 ms</td>
+                                <td>
+                                    <span class="badge bg-info-subtle text-info"
+                                          th:text="${(bm.aprioriRuntimeMs - bm.fpgrowthRuntimeMs) + ' ms'}">7 ms</span>
+                                </td>
+                                <td><span class="badge bg-success-subtle text-success" th:text="${bm.ruleOverlapPercentage + '%'}">100%</span></td>
+                                <td><span class="badge bg-primary" th:text="${bm.recommendedAlgorithm}">FP-Growth</span></td>
+                                <td class="small text-muted" th:text="${#temporals.format(bm.createdAt, 'dd/MM/yyyy HH:mm')}">19/09/2026</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<div th:replace="~{layout/base :: scripts}"></div>
+</body>
+</html>

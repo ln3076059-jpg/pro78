@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head th:replace="~{layout/base :: head('Luật Kết Hợp (Association Rules)')}"></head>
+<body>
+
+<div class="container-fluid p-0">
+    <div class="row g-0">
+        <nav th:replace="~{layout/base :: sidebar}"></nav>
+
+        <main class="col-md-9 col-lg-10 ms-sm-auto px-md-4 py-3">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                <h4 class="h5 text-primary fw-bold mb-0">Khai Phá Luật Kết Hợp Thuốc (Association Rules)</h4>
+            </div>
+
+            <!-- Bộ Lọc Nâng Cao Theo Yêu Cầu Đề Tài -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white py-3">
+                    <h6 class="card-title mb-0 fw-bold text-secondary">
+                        <i class="fas fa-filter text-primary me-2"></i> Bộ Lọc Đánh Giá Luật (Support, Confidence, Lift &amp; Tên Thuốc)
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/mining/rules}" method="get" class="row g-3 align-items-end">
+                        <div class="col-md-3">
+                            <label class="form-label small fw-semibold">Lần Chạy (Mining Run):</label>
+                            <select name="runId" class="form-select">
+                                <option th:each="r : ${runs}"
+                                        th:value="${r.id}"
+                                        th:text="${r.algorithm + ' - ' + r.runName + ' (' + r.ruleCount + ' rules)'}"
+                                        th:selected="${r.id == selectedRunId}">Run 1</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label class="form-label small fw-semibold">Lọc Min Support:</label>
+                            <input type="number" step="0.01" min="0.0" max="1.0" name="minSupport"
+                                   th:value="${minSupportFilter}" class="form-control" placeholder="0.0">
+                        </div>
+
+                        <div class="col-md-2">
+                            <label class="form-label small fw-semibold">Lọc Min Confidence:</label>
+                            <input type="number" step="0.05" min="0.0" max="1.0" name="minConfidence"
+                                   th:value="${minConfidenceFilter}" class="form-control" placeholder="0.0">
+                        </div>
+
+                        <div class="col-md-2">
+                            <label class="form-label small fw-semibold">Lọc Min Lift:</label>
+                            <input type="number" step="0.1" min="0.0" name="minLift"
+                                   th:value="${minLiftFilter}" class="form-control" placeholder="1.0">
+                        </div>
+
+                        <div class="col-md-2">
+                            <label class="form-label small fw-semibold">Sắp Xếp Theo:</label>
+                            <select name="sortBy" class="form-select">
+                                <option value="CONFIDENCE_DESC" th:selected="${sortBy == 'CONFIDENCE_DESC'}">Confidence &darr;</option>
+                                <option value="SUPPORT_DESC" th:selected="${sortBy == 'SUPPORT_DESC'}">Support &darr;</option>
+                                <option value="LIFT_DESC" th:selected="${sortBy == 'LIFT_DESC'}">Lift &darr;</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label small fw-semibold">Tìm Theo Tên Thuốc:</label>
+                            <div class="input-group">
+                                <input type="text" name="drug" th:value="${drugFilter}" class="form-control" placeholder="VD: Aspirin, Metoprolol">
+                                <button type="submit" class="btn btn-primary" title="Lọc">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                                <a th:if="${selectedRunId != null}" th:href="@{/mining/export/rules(runId=${selectedRunId})}" class="btn btn-success" title="Tải file CSV">
+                                    <i class="fas fa-file-csv me-1"></i> CSV
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Bảng Danh Sách Association Rules -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="card-title mb-0 fw-bold text-secondary">
+                        <i class="fas fa-project-diagram text-primary me-2"></i> Danh Sách Luật Kết Hợp Khai Phá Được
+                    </h6>
+                    <div class="d-flex align-items-center gap-2">
+                        <a th:href="@{/mining/export/rules}" class="btn btn-sm btn-outline-success">
+                            <i class="fas fa-download me-1"></i> Xuất Tất Cả Rules (CSV)
+                        </a>
+                        <span th:if="${currentRun != null}" class="badge bg-light text-dark border">
+                            Thuật toán: <strong th:text="${currentRun.algorithm}">APRIORI</strong> | Tổng số luật: <strong th:text="${rules != null ? rules.size() : 0}">0</strong>
+                        </span>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>#</th>
+                                <th>Tiền Đề (Antecedent: X)</th>
+                                <th class="text-center">&rarr;</th>
+                                <th>Hệ Quả (Consequent: Y)</th>
+                                <th>Độ Hỗ Trợ (Support)</th>
+                                <th>Độ Tin Cậy (Confidence)</th>
+                                <th>Độ Nâng (Lift)</th>
+                                <th>Thuật Toán</th>
+                                <th>Ý Nghĩa Khai Phá</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="rule, stat : ${rules}">
+                                <td th:text="${stat.count}">1</td>
+                                <td>
+                                    <div class="d-flex flex-wrap gap-1">
+                                        <span th:each="ant : ${#strings.arraySplit(rule.antecedent, ',')}"
+                                              class="badge bg-light text-primary border"
+                                              th:text="${ant.trim()}">Aspirin</span>
+                                    </div>
+                                </td>
+                                <td class="text-center text-muted"><i class="fas fa-arrow-right"></i></td>
+                                <td>
+                                    <div class="d-flex flex-wrap gap-1">
+                                        <span th:each="csq : ${#strings.arraySplit(rule.consequent, ',')}"
+                                              class="badge bg-primary-subtle text-primary border fw-bold"
+                                              th:text="${csq.trim()}">Metoprolol</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge badge-support" th:text="${#numbers.formatDecimal(rule.support * 100, 1, 1) + '%'}">15.0%</span>
+                                </td>
+                                <td>
+                                    <span class="badge badge-confidence" th:text="${#numbers.formatDecimal(rule.confidence * 100, 1, 1) + '%'}">75.0%</span>
+                                </td>
+                                <td>
+                                    <span class="badge badge-lift" th:text="${#numbers.formatDecimal(rule.lift, 1, 2)}">1.45</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary-subtle text-secondary" th:text="${rule.miningRun.algorithm}">APRIORI</span>
+                                </td>
+                                <td>
+                                    <span th:if="${rule.lift > 1.0}" class="text-success small fw-semibold">
+                                        <i class="fas fa-arrow-up me-1"></i> Đồng xuất hiện dương tính
+                                    </span>
+                                    <span th:if="${rule.lift == 1.0}" class="text-secondary small">
+                                        Độc lập thống kê
+                                    </span>
+                                    <span th:if="${rule.lift < 1.0}" class="text-danger small">
+                                        <i class="fas fa-arrow-down me-1"></i> Xuất hiện nghịch chiều
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr th:if="${rules == null or rules.isEmpty()}">
+                                <td colspan="9" class="text-center text-muted py-4">Không tìm thấy luật kết hợp nào thỏa mãn bộ lọc hiện tại.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Clinical Disclaimer -->
+            <div class="clinical-alert">
+                <i class="fas fa-info-circle me-1 fs-5 align-middle"></i>
+                <strong>Khẳng Định Đánh Giá Khoa Học (Mục 8):</strong>
+                Luật kết hợp chỉ phản ánh sự đồng xuất hiện / phối hợp kê đơn (co-prescription) trong dữ liệu lịch sử MIMIC-III,
+                <strong>không chứng minh quan hệ nhân quả, hiệu quả điều trị hoặc tính an toàn của phối hợp thuốc</strong>.
+                Nếu cần cảnh báo tương tác thuốc DDI, phải đối chiếu với cơ sở dữ liệu chuyên biệt (như DrugBank hoặc TWOSIDES).
+            </div>
+        </main>
+    </div>
+</div>
+
+<div th:replace="~{layout/base :: scripts}"></div>
+</body>
+</html>

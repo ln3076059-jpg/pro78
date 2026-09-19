@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head th:replace="~{layout/base :: head('Quản lý Dataset UCI Diabetes 130-US Hospitals')}"></head>
+<body>
+
+<div class="container-fluid p-0">
+    <div class="row g-0">
+        <nav th:replace="~{layout/base :: sidebar}"></nav>
+
+        <main class="col-md-9 col-lg-10 ms-sm-auto px-md-4 py-3">
+            <div th:replace="~{layout/base :: topbar}"></div>
+
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                <div>
+                    <h4 class="h5 text-primary fw-bold mb-0">
+                        <i class="fas fa-database text-primary me-2"></i> Quản Lý Nguồn Dữ Liệu UCI Diabetes 130-US Hospitals
+                    </h4>
+                    <small class="text-muted">Bộ dữ liệu lâm sàng đái tháo đường quy mô lớn (1999–2008) từ hơn 130 bệnh viện Hoa Kỳ</small>
+                </div>
+            </div>
+
+            <!-- Flash alerts -->
+            <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle me-1"></i> <span th:text="${successMessage}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-triangle me-1"></i> <span th:text="${errorMessage}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <!-- Card Trạng thái Dataset hiện tại -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-7">
+                            <h5 class="fw-bold text-dark mb-1">
+                                <i class="fas fa-hospital-user text-primary me-2"></i> Dataset Đang Hoạt Động
+                            </h5>
+                            <p class="text-muted mb-2">Tên nguồn: <span class="badge bg-primary text-white" th:text="${currentDataset}">UCI Diabetes 130-US Hospitals</span></p>
+                            <div class="d-flex flex-wrap gap-4">
+                                <div><i class="fas fa-receipt text-info me-1"></i> Transactions (&ge; 2 thuốc): <strong th:text="${transactionCount}">0</strong></div>
+                                <div><i class="fas fa-pills text-success me-1"></i> Thuốc được xem xét: <strong th:text="${uniqueDrugCount}">0</strong></div>
+                            </div>
+                        </div>
+                        <div class="col-md-5 text-md-end mt-3 mt-md-0 d-flex flex-wrap justify-content-md-end gap-2">
+                            <form th:action="@{/mining/dataset/demo}" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-outline-primary btn-sm" title="Nạp 2,000 ca điều trị để thử nghiệm nhanh">
+                                    <i class="fas fa-sync-alt me-1"></i> Nạp Mẫu Demo (2,000 ca)
+                                </button>
+                            </form>
+                            <form th:action="@{/mining/dataset/demo-large}" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-success btn-sm" title="Nạp toàn bộ 100,000+ ca điều trị từ diabetic_data.csv">
+                                    <i class="fas fa-database me-1"></i> Nạp Toàn Bộ UCI Dataset (100k+)
+                                </button>
+                            </form>
+                            <a th:href="@{/mining/export/statistics}" class="btn btn-outline-secondary btn-sm" title="Tải thống kê Data Understanding">
+                                <i class="fas fa-file-csv me-1"></i> Xuất Thống Kê (CSV)
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card Chi tiết Thống kê Data Understanding (CRISP-DM Giai đoạn 2 & Mục 8 đề tài) -->
+            <div class="card shadow-sm border-0 mb-4" th:if="${latestStats != null}">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="card-title mb-0 fw-bold text-secondary">
+                        <i class="fas fa-chart-bar text-primary me-2"></i> Kết Quả Thống Kê Data Understanding (Mục 8 Đề Tài)
+                    </h6>
+                    <span class="badge bg-light text-dark border" th:text="${'Tệp: ' + latestStats.datasetName}">diabetic_data.csv</span>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3 text-center">
+                        <div class="col-6 col-md-4 col-lg-2 border-end">
+                            <div class="small text-muted">Tổng Encounter</div>
+                            <div class="fs-5 fw-bold text-dark" th:text="${latestStats.totalRecords}">0</div>
+                        </div>
+                        <div class="col-6 col-md-4 col-lg-2 border-end">
+                            <div class="small text-muted">Bệnh Nhân (patient_nbr)</div>
+                            <div class="fs-5 fw-bold text-primary" th:text="${latestStats.uniqueSubjectCount}">0</div>
+                        </div>
+                        <div class="col-6 col-md-4 col-lg-2 border-end">
+                            <div class="small text-muted">Transactions (&ge; 2 thuốc)</div>
+                            <div class="fs-5 fw-bold text-success" th:text="${latestStats.multiDrugTransactionCount}">0</div>
+                        </div>
+                        <div class="col-6 col-md-4 col-lg-2 border-end">
+                            <div class="small text-muted">Encounter (1 thuốc)</div>
+                            <div class="fs-5 fw-bold text-info" th:text="${latestStats.oneDrugEncounterCount}">0</div>
+                        </div>
+                        <div class="col-6 col-md-4 col-lg-2 border-end">
+                            <div class="small text-muted">Encounter (0 thuốc)</div>
+                            <div class="fs-5 fw-bold text-secondary" th:text="${latestStats.zeroDrugEncounterCount}">0</div>
+                        </div>
+                        <div class="col-6 col-md-4 col-lg-2">
+                            <div class="small text-muted">Thuốc/Encounter (TB/Min/Max)</div>
+                            <div class="fs-5 fw-bold text-dark" th:text="${latestStats.avgDrugsPerHadm + ' / ' + latestStats.minDrugsPerHadm + ' / ' + latestStats.maxDrugsPerHadm}">0</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Visual Charts cho Data Understanding -->
+            <div class="row g-3 mb-4" th:if="${latestStats != null}">
+                <div class="col-lg-6">
+                    <div class="card shadow-sm border-0 h-100">
+                        <div class="card-header bg-white py-3">
+                            <h6 class="card-title mb-0 fw-bold text-secondary">
+                                <i class="fas fa-pills text-primary me-2"></i> Top 10 Thuốc Xuất Hiện Nhiều Nhất
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="topDrugsChart" height="220"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="card shadow-sm border-0 h-100">
+                        <div class="card-header bg-white py-3">
+                            <h6 class="card-title mb-0 fw-bold text-secondary">
+                                <i class="fas fa-user-clock text-info me-2"></i> Phân Bố Bệnh Nhân Theo Nhóm Tuổi
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="ageDistributionChart" height="220"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Upload File CSV mới -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <div class="card shadow-sm border-0 h-100">
+                        <div class="card-header bg-white py-3">
+                            <h6 class="card-title mb-0 fw-bold text-secondary">
+                                <i class="fas fa-cloud-upload-alt text-primary me-2"></i> Tải Lên Tệp Dataset Mới (CSV)
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-muted small">
+                                Hệ thống hỗ trợ nạp tệp CSV theo chuẩn streaming (Apache Commons CSV), tự động kiểm tra header,
+                                trích xuất thuốc theo quy ước <code>No</code> (không dùng) và <code>Steady</code>, <code>Up</code>, <code>Down</code> (có dùng).
+                            </p>
+                            <form th:action="@{/mining/dataset/upload}" method="post" enctype="multipart/form-data">
+                                <div class="mb-3">
+                                    <label class="form-label small fw-semibold">Chọn tệp CSV (diabetic_data.csv):</label>
+                                    <input type="file" name="file" class="form-control" accept=".csv" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-upload me-1"></i> Bắt đầu Nạp &amp; Tiền Xử Lý
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card shadow-sm border-0 h-100">
+                        <div class="card-header bg-white py-3">
+                            <h6 class="card-title mb-0 fw-bold text-secondary">
+                                <i class="fas fa-info-circle text-info me-2"></i> Quy Ước Trích Xuất Dữ Liệu UCI Diabetes
+                            </h6>
+                        </div>
+                        <div class="card-body small text-muted">
+                            <p class="mb-2">Bộ dữ liệu gồm hơn 100,000 đợt điều trị tại 130 bệnh viện Hoa Kỳ:</p>
+                            <ul>
+                                <li><code>encounter_id</code>: Mã định danh đợt điều trị (được xem là Transaction ID).</li>
+                                <li><code>patient_nbr</code>: Mã định danh bệnh nhân duy nhất.</li>
+                                <li><strong>24 cột thuốc tiểu đường:</strong> Metformin, Repaglinide, Glimepiride, Glipizide, Glyburide, Pioglitazone, Rosiglitazone, Acarbose, Insulin, v.v.</li>
+                                <li><strong>Quy ước giá trị:</strong> <code>No</code> = không sử dụng; <code>Steady</code>, <code>Up</code>, <code>Down</code> = có sử dụng thuốc trong đợt điều trị.</li>
+                                <li>Chỉ các transaction có <strong>&ge; 2 loại thuốc</strong> được đưa vào bài toán khai phá luật kết hợp chính.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Nguồn Dữ Liệu Uy Tín & Nghiên Cứu Khoa Học (Mục 3 & Mục 5 Đề Tài) -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white py-3">
+                    <h6 class="card-title mb-0 fw-bold text-secondary">
+                        <i class="fas fa-book-medical text-success me-2"></i> Nguồn Dữ Liệu Uy Tín &amp; Bài Báo Khoa Học Tham Khảo (Mục 3 &amp; 5)
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="p-3 border rounded-3 bg-light h-100">
+                                <h6 class="fw-bold text-primary mb-2">
+                                    <i class="fas fa-database me-1"></i> UCI Machine Learning Repository
+                                </h6>
+                                <p class="small text-muted mb-2">
+                                    <strong>Diabetes 130-US Hospitals for Years 1999–2008 Dataset</strong> (Strack et al., 2014).
+                                    Bộ dữ liệu thực tế gồm 101,766 ca điều trị đái tháo đường tại 130 bệnh viện Mỹ, theo dõi đầy đủ hồ sơ bệnh án và lịch sử sử dụng 24 nhóm thuốc hạ đường huyết.
+                                </p>
+                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle">
+                                    101,766 encounters | 24 nhóm thuốc
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 border rounded-3 bg-light h-100">
+                                <h6 class="fw-bold text-success mb-2">
+                                    <i class="fas fa-flask me-1"></i> Tatonetti et al. (2012)
+                                </h6>
+                                <p class="small text-muted mb-2">
+                                    <strong>"Data-driven prediction of drug effects and interactions"</strong> - Science Translational Medicine.
+                                    Nghiên cứu cho thấy dữ liệu thực tế (Real-World Data) từ bệnh viện có thể phát hiện các tín hiệu đồng sử dụng và tương tác thuốc tiềm ẩn.
+                                    Đồ án ứng dụng Association Rule Mining từ động lực khoa học này.
+                                </p>
+                                <span class="badge bg-success-subtle text-success border border-success-subtle">
+                                    Science Translational Medicine
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<div th:replace="~{layout/base :: scripts}"></div>
+
+<!-- Script vẽ biểu đồ Data Understanding bằng Chart.js -->
+<script th:inline="javascript" th:if="${latestStats != null}">
+    document.addEventListener('DOMContentLoaded', function() {
+        // Top 10 thuốc
+        const topDrugsRaw = /*[[${latestStats.topDrugsJson}]]*/ '[]';
+        try {
+            const topDrugsData = JSON.parse(topDrugsRaw || '[]');
+            if (topDrugsData && topDrugsData.length > 0) {
+                const labels = topDrugsData.map(d => d.name);
+                const counts = topDrugsData.map(d => d.count);
+                new Chart(document.getElementById('topDrugsChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Số lần xuất hiện (Encounters)',
+                            data: counts,
+                            backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: { legend: { display: false } },
+                        scales: { y: { beginAtZero: true } }
+                    }
+                });
+            }
+        } catch(e) {
+            console.error('Lỗi parse top drugs json:', e);
+        }
+
+        // Phân bố độ tuổi
+        const ageDistRaw = /*[[${latestStats.ageDistributionJson}]]*/ '{}';
+        try {
+            const ageDistData = JSON.parse(ageDistRaw || '{}');
+            const ageLabels = Object.keys(ageDistData);
+            const ageCounts = Object.values(ageDistData);
+            if (ageLabels.length > 0) {
+                new Chart(document.getElementById('ageDistributionChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: ageLabels,
+                        datasets: [{
+                            label: 'Số bệnh nhân',
+                            data: ageCounts,
+                            backgroundColor: 'rgba(75, 192, 192, 0.7)',
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: { legend: { display: false } },
+                        scales: { y: { beginAtZero: true } }
+                    }
+                });
+            }
+        } catch(e) {
+            console.error('Lỗi parse age dist json:', e);
+        }
+    });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head th:replace="~{layout/base :: head('Tiền Xử Lý Dữ Liệu (ETL)')}"></head>
+<body>
+
+<div class="container-fluid p-0">
+    <div class="row g-0">
+        <nav th:replace="~{layout/base :: sidebar}"></nav>
+
+        <main class="col-md-9 col-lg-10 ms-sm-auto px-md-4 py-3">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                <h4 class="h5 text-primary fw-bold mb-0">Quy Trình Tiền Xử Lý Dữ Liệu Lâm Sàng (ETL)</h4>
+            </div>
+
+            <!-- Pipeline 7 bước tiền xử lý -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white py-3">
+                    <h6 class="card-title mb-0 fw-bold text-secondary">
+                        <i class="fas fa-tasks text-primary me-2"></i> 7 Bước Tiền Xử Lý Dữ Liệu Chuẩn Hóa Theo Đề Tài
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="p-3 border rounded h-100 bg-light">
+                                <span class="badge bg-primary mb-2">Bước 1 &amp; 2</span>
+                                <h6 class="fw-bold">Streaming CSV &amp; Lọc Rỗng</h6>
+                                <p class="small text-muted mb-0">
+                                    Đọc tệp dung lượng lớn theo luồng <code>BufferedReader</code> không nạp toàn bộ vào RAM.
+                                    Loại bỏ ngay các bản ghi thiếu <code>HADM_ID</code> hoặc thiếu tên thuốc.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-3 border rounded h-100 bg-light">
+                                <span class="badge bg-primary mb-2">Bước 3 &amp; 4</span>
+                                <h6 class="fw-bold">Ưu Tiên Tên Gốc &amp; Casing</h6>
+                                <p class="small text-muted mb-0">
+                                    Ưu tiên trích xuất <code>DRUG_NAME_GENERIC</code>, nếu thiếu sẽ fallback sang <code>DRUG</code>.
+                                    Trim khoảng trắng thừa và chuẩn hóa Title Case (viết hoa chữ cái đầu).
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-3 border rounded h-100 bg-light">
+                                <span class="badge bg-primary mb-2">Bước 5, 6 &amp; 7</span>
+                                <h6 class="fw-bold">Khử Trùng &amp; Lọc Đơn Nhỏ</h6>
+                                <p class="small text-muted mb-0">
+                                    Gom theo <code>HADM_ID</code> vào <code>Set&lt;String&gt;</code> để loại bỏ thuốc trùng lặp trong cùng 1 lần nhập viện.
+                                    Loại bỏ các giao dịch có ít hơn 2 loại thuốc (không có tính chất kết hợp).
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bảng Thống Kê Tần Suất Thuốc Sau Tiền Xử Lý -->
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="card-title mb-0 fw-bold text-secondary">
+                        <i class="fas fa-pills text-success me-2"></i> Danh Sách Thuốc Đã Chuẩn Hóa &amp; Tần Suất Kê Đơn
+                    </h6>
+                    <span class="badge bg-light text-dark border">Tổng số loại thuốc: <strong th:text="${uniqueDrugCount}">0</strong></span>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>#</th>
+                                <th>Tên Thuốc Chuẩn Hóa (Generic Name)</th>
+                                <th>Số Lần Xuất Hiện (Giao Dịch HADM_ID)</th>
+                                <th>Tỷ Lệ Xuất Hiện (Độ Hỗ Trợ 1-Itemset)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="entry, stat : ${drugFrequencies}">
+                                <td th:text="${stat.count}">1</td>
+                                <td>
+                                    <span class="badge bg-primary-subtle text-primary fs-6" th:text="${entry.key}">Aspirin</span>
+                                </td>
+                                <td>
+                                    <strong th:text="${entry.value}">12</strong> / <span th:text="${transactionCount}">20</span>
+                                </td>
+                                <td>
+                                    <div class="progress" style="height: 18px;">
+                                        <div class="progress-bar bg-info" role="progressbar"
+                                             th:style="'width: ' + (${entry.value} * 100.0 / ${transactionCount}) + '%;'"
+                                             th:text="${#numbers.formatDecimal(entry.value * 100.0 / transactionCount, 1, 1) + '%'}">
+                                            60%
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr th:if="${drugFrequencies == null or drugFrequencies.isEmpty()}">
+                                <td colspan="4" class="text-center text-muted py-3">Chưa có dữ liệu thuốc được nạp.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<div th:replace="~{layout/base :: scripts}"></div>
+</body>
+</html>

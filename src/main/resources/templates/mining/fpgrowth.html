@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head th:replace="~{layout/base :: head('Cấu hình &amp; Chạy Thuật Toán FP-Growth')}"></head>
+<body>
+
+<div class="container-fluid p-0">
+    <div class="row g-0">
+        <nav th:replace="~{layout/base :: sidebar}"></nav>
+
+        <main class="col-md-9 col-lg-10 ms-sm-auto px-md-4 py-3">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                <h4 class="h5 text-primary fw-bold mb-0">Thuật Toán FP-Growth (Frequent Pattern Tree - Thuần Java)</h4>
+            </div>
+
+            <!-- Flash alerts -->
+            <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-triangle me-1"></i> <span th:text="${errorMessage}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <div class="row g-3 mb-4">
+                <!-- Form cấu hình tham số FP-Growth -->
+                <div class="col-lg-6">
+                    <div class="card shadow-sm border-0 h-100">
+                        <div class="card-header bg-white py-3">
+                            <h6 class="card-title mb-0 fw-bold text-secondary">
+                                <i class="fas fa-sliders-h text-success me-2"></i> Thiết Lập Tham Số Khai Phá FP-Growth
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <form th:action="@{/mining/fpgrowth/run}" method="post" th:object="${params}">
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">Độ Hỗ Trợ Tối Thiểu (minSupport: 0.01 - 1.0):</label>
+                                    <input type="number" step="0.01" min="0.01" max="1.0" th:field="*{minSupport}" class="form-control" required>
+                                    <small class="text-muted">Ngưỡng lọc tần suất các nhánh trên cây FP-Tree.</small>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">Độ Tin Cậy Tối Thiểu (minConfidence: 0.1 - 1.0):</label>
+                                    <input type="number" step="0.05" min="0.1" max="1.0" th:field="*{minConfidence}" class="form-control" required>
+                                    <small class="text-muted">Độ tin cậy tối thiểu của luật kết hợp được sinh ra.</small>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">Độ Nâng Tối Thiểu (minLift >= 1.0):</label>
+                                    <input type="number" step="0.1" min="0.0" th:field="*{minLift}" class="form-control" required>
+                                    <small class="text-muted">Đảm bảo luật sinh ra có tính tương hỗ tích cực.</small>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label class="form-label fw-semibold">Kích Thước Tập Mục Tối Đa (maxItemsetSize):</label>
+                                    <input type="number" min="2" max="10" th:field="*{maxItemsetSize}" class="form-control" required>
+                                    <small class="text-muted">Độ sâu đệ quy tối đa trên cây FP-Tree điều kiện.</small>
+                                </div>
+
+                                <button type="submit" class="btn btn-success w-100 py-2 fw-semibold">
+                                    <i class="fas fa-play me-1"></i> Thực Thi Khai Phá FP-Growth
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Giải thích cơ chế FP-Growth -->
+                <div class="col-lg-6">
+                    <div class="card shadow-sm border-0 h-100">
+                        <div class="card-header bg-white py-3">
+                            <h6 class="card-title mb-0 fw-bold text-secondary">
+                                <i class="fas fa-tree text-success me-2"></i> Ưu Thế Của FP-Growth So Với Apriori
+                            </h6>
+                        </div>
+                        <div class="card-body small text-muted">
+                            <h6 class="fw-bold text-dark">1. Cấu Trúc Dữ Liệu Nén FP-Tree:</h6>
+                            <p>
+                                Thay vì quét cơ sở dữ liệu lặp đi lặp lại nhiều lần để đếm ứng viên như Apriori, FP-Growth chỉ quét CSDL <strong>2 lần</strong>:
+                                Lần 1 để đếm tần suất 1-itemset, và lần 2 để xây dựng toàn bộ cây tiền tố FP-Tree.
+                            </p>
+
+                            <h6 class="fw-bold text-dark mt-3">2. Cơ Chế Khai Phá Divide-and-Conquer:</h6>
+                            <p>
+                                Khai phá đệ quy thông qua <em>Conditional Pattern Base</em> và <em>Conditional FP-Tree</em> từ các mục có tần suất thấp nhất
+                                duyệt lên theo danh sách liên kết Header Table.
+                            </p>
+
+                            <div class="p-3 bg-light rounded mt-3">
+                                <i class="fas fa-check-double text-success me-1"></i>
+                                <strong>Không sinh ứng viên (No Candidate Generation):</strong> Tránh được hiện tượng bùng nổ tổ hợp ứng viên
+                                khi dữ liệu đơn thuốc MIMIC-III lớn với nhiều thuốc khác nhau.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lịch sử các lần chạy FP-Growth -->
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white py-3">
+                    <h6 class="card-title mb-0 fw-bold text-secondary">
+                        <i class="fas fa-history text-secondary me-2"></i> Lịch Sử Các Lần Khai Phá FP-Growth Đã Lưu
+                    </h6>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Mã Lần Chạy</th>
+                                <th>minSupport</th>
+                                <th>minConfidence</th>
+                                <th>minLift</th>
+                                <th>Transactions</th>
+                                <th>Frequent Itemsets</th>
+                                <th>Rules Sinh Ra</th>
+                                <th>Runtime</th>
+                                <th>Hành Động</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="run : ${runs}" th:if="${run.algorithm == 'FP_GROWTH'}">
+                                <td><strong th:text="${run.runName}">Run 1</strong></td>
+                                <td th:text="${#numbers.formatDecimal(run.minSupport * 100, 1, 0) + '%'}">10%</td>
+                                <td th:text="${#numbers.formatDecimal(run.minConfidence * 100, 1, 0) + '%'}">50%</td>
+                                <td th:text="${#numbers.formatDecimal(run.minLift, 1, 2)}">1.00</td>
+                                <td th:text="${run.transactionCount}">20</td>
+                                <td><span class="badge bg-success" th:text="${run.frequentItemsetCount}">8</span></td>
+                                <td><span class="badge bg-primary" th:text="${run.ruleCount}">12</span></td>
+                                <td><span class="badge bg-light text-dark border" th:text="${run.runtimeMs + ' ms'}">8 ms</span></td>
+                                <td>
+                                    <a th:href="@{/mining/rules(runId=${run.id})}" class="btn btn-sm btn-outline-success">
+                                        <i class="fas fa-eye me-1"></i> Xem Luật
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<div th:replace="~{layout/base :: scripts}"></div>
+</body>
+</html>

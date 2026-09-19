@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head th:replace="~{layout/base :: head('Chi Tiết Đơn Thuốc')}"></head>
+<body>
+
+<div class="container-fluid p-0">
+    <div class="row g-0">
+        <nav th:replace="~{layout/base :: sidebar}"></nav>
+
+        <main class="col-md-9 col-lg-10 ms-sm-auto px-md-4 py-3">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                <h4 class="h5 text-primary fw-bold mb-0">
+                    <i class="fas fa-file-prescription me-2"></i> Chi Tiết Đơn Thuốc: <span th:text="${prescription.prescriptionCode}">RX001</span>
+                </h4>
+                <div>
+                    <a th:href="@{/prescriptions}" class="btn btn-sm btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-1"></i> Quay lại
+                    </a>
+                </div>
+            </div>
+
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white py-3">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <h6 class="fw-bold mb-0 text-dark">Bệnh viện Đa Khoa MediMining</h6>
+                            <small class="text-muted">Khoa Khám Bệnh &amp; Điều Trị Nội Trú</small>
+                        </div>
+                        <div class="col-md-6 text-md-end">
+                            <span class="badge bg-success-subtle text-success border">ĐƠN THUỐC ĐIỀU TRỊ</span>
+                            <div class="small text-muted mt-1" th:text="${'Ngày kê: ' + #temporals.format(prescription.createdAt, 'dd/MM/yyyy HH:mm')}">19/09/2026</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Thông tin bệnh nhân và bác sĩ -->
+                    <div class="row g-3 mb-4 p-3 bg-light rounded">
+                        <div class="col-md-6">
+                            <div class="text-muted small">Họ tên người bệnh:</div>
+                            <strong class="fs-6" th:text="${prescription.visit.patient.fullName}">Nguyễn Văn Hùng</strong>
+                            <div class="small text-muted" th:text="${'Mã BN: ' + prescription.visit.patient.patientCode + ' | Giới tính: ' + prescription.visit.patient.gender}">PAT001</div>
+                            <div class="small text-muted" th:text="${'Địa chỉ: ' + prescription.visit.patient.address}">Hà Nội</div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="text-muted small">Bác sĩ điều trị:</div>
+                            <strong class="fs-6" th:text="${prescription.doctor.fullName}">BS. Nguyễn Văn Tuấn</strong>
+                            <div class="small text-muted" th:text="${'Chuyên khoa: ' + prescription.doctor.specialty}">Tim Mạch</div>
+                            <div class="small text-muted" th:text="${'Chẩn đoán: ' + (prescription.visit.initialDiagnosis != null ? prescription.visit.initialDiagnosis.diseaseName : 'N/A')}">Bệnh tim</div>
+                        </div>
+                    </div>
+
+                    <!-- Bảng các thuốc kê trong đơn -->
+                    <h6 class="fw-bold text-secondary mb-3"><i class="fas fa-pills text-primary me-2"></i> Chỉ Định Thuốc Điều Trị:</h6>
+                    <div class="table-responsive mb-4">
+                        <table class="table table-bordered align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 40px;" class="text-center">STT</th>
+                                    <th>Tên Thuốc (Biệt Dược &amp; Tên Gốc)</th>
+                                    <th>Dạng Bào Chế</th>
+                                    <th>Liều Dùng</th>
+                                    <th>Tần Suất</th>
+                                    <th class="text-center">Số Ngày</th>
+                                    <th>Hướng Dẫn Dùng Thuốc</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="it, stat : ${prescription.items}">
+                                    <td class="text-center" th:text="${stat.count}">1</td>
+                                    <td>
+                                        <strong th:text="${it.medicine.genericName}">Aspirin</strong>
+                                        <span class="text-muted small" th:text="${' (' + it.medicine.brandName + ' - ' + it.medicine.strength + ')'}">(81mg)</span>
+                                    </td>
+                                    <td th:text="${it.medicine.dosageForm}">Viên nén</td>
+                                    <td th:text="${it.dosage}">1 viên</td>
+                                    <td th:text="${it.frequency}">1 lần/ngày</td>
+                                    <td class="text-center" th:text="${it.durationDays}">7</td>
+                                    <td th:text="${it.instructions}">Uống sau ăn</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Lời dặn -->
+                    <div class="p-3 border rounded bg-light" th:if="${prescription.advice != null and !#strings.isEmpty(prescription.advice)}">
+                        <h6 class="fw-bold text-dark mb-1"><i class="fas fa-comment-medical text-info me-2"></i> Lời dặn của bác sĩ:</h6>
+                        <p class="mb-0 text-secondary" th:text="${prescription.advice}">Tái khám sau 7 ngày...</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<div th:replace="~{layout/base :: scripts}"></div>
+</body>
+</html>

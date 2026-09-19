@@ -1,0 +1,20 @@
+10001: Aspirin, Metoprolol, Heparin, Pantoprazole, Atorvastatin
+10002: Heparin, Pantoprazole, Acetaminophen
+10003: Aspirin, Metoprolol, Pantoprazole
+10004: Aspirin, Heparin, Metoprolol, Atorvastatin
+10005: Furosemide, Potassium Chloride, Metoprolol, Lisinopril
+10006: Furosemide, Potassium Chloride, Pantoprazole
+10007: Aspirin, Metoprolol, Heparin, Pantoprazole
+10008: Insulin, Metformin, Atorvastatin, Aspirin
+10009: Heparin, Aspirin, Metoprolol
+10010: Furosemide, Potassium Chloride, Metoprolol
+10011: Aspirin, Metoprolol, Atorvastatin, Pantoprazole
+10012: Acetaminophen, Pantoprazole, Heparin
+10013: Aspirin, Metoprolol, Heparin
+10014: Furosemide, Potassium Chloride, Lisinopril
+10015: Insulin, Metformin, Atorvastatin
+10016: Aspirin, Metoprolol, Pantoprazole, Atorvastatin
+10017: Heparin, Pantoprazole, Metoprolol
+10018: Aspirin, Heparin, Metoprolol, Pantoprazole
+10019: Furosemide, Potassium Chloride, Lisinopril, Metoprolol
+10020: Aspirin, Metoprolol, Atorvastatin

@@ -66,4 +66,17 @@ class MiningEvaluationServiceTest {
         assertNotNull(result.getRecommendedAlgorithm());
         assertFalse(result.getConclusionNotes().contains("MIMIC"), "Không được chứa từ khóa MIMIC trong kết luận");
     }
+
+    @Test
+    @DisplayName("Ném NullPointerException khi transactions hoặc params bị null")
+    void testNullInputsThrowException() {
+        MiningParameters params = MiningParameters.builder().minSupport(0.1).minConfidence(0.5).build();
+        NullPointerException ex1 = assertThrows(NullPointerException.class, () ->
+                evaluationService.runBenchmark(null, params, "Test"));
+        assertTrue(ex1.getMessage().contains("Transactions không được null"));
+
+        NullPointerException ex2 = assertThrows(NullPointerException.class, () ->
+                evaluationService.runBenchmark(Collections.emptyList(), null, "Test"));
+        assertTrue(ex2.getMessage().contains("MiningParameters không được null"));
+    }
 }

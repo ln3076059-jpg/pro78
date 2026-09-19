@@ -36,6 +36,10 @@ public class MiningEvaluationService {
     public BenchmarkComparisonDTO runBenchmark(List<Set<String>> transactions,
                                                MiningParameters params,
                                                String datasetName) {
+        java.util.Objects.requireNonNull(transactions, "Transactions không được null");
+        java.util.Objects.requireNonNull(params, "MiningParameters không được null");
+        params.validate();
+
         log.info("Bắt đầu Benchmark so sánh Apriori vs FP-Growth trên {} transactions (minSupport={})...",
                 transactions.size(), params.getMinSupport());
 

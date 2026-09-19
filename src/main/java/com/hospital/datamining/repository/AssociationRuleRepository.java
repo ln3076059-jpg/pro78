@@ -1,6 +1,7 @@
 package com.hospital.datamining.repository;
 
 import com.hospital.datamining.entity.AssociationRule;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -38,6 +39,7 @@ public interface AssociationRuleRepository extends JpaRepository<AssociationRule
                                              @Param("minLift") Double minLift,
                                              @Param("drugName") String drugName);
 
+    @EntityGraph(attributePaths = {"antecedents", "consequents"})
     @Query("SELECT r FROM AssociationRule r WHERE r.miningRun.id = :miningRunId " +
            "AND r.confidence >= :minConfidence " +
            "AND r.lift > :minLift " +
@@ -46,6 +48,7 @@ public interface AssociationRuleRepository extends JpaRepository<AssociationRule
                                                 @Param("minConfidence") Double minConfidence,
                                                 @Param("minLift") Double minLift);
 
+    @EntityGraph(attributePaths = {"antecedents", "consequents"})
     @Query("SELECT DISTINCT r FROM AssociationRule r " +
            "JOIN r.antecedents a " +
            "WHERE r.miningRun.id = :miningRunId " +
@@ -59,6 +62,7 @@ public interface AssociationRuleRepository extends JpaRepository<AssociationRule
             @Param("minConfidence") Double minConfidence,
             @Param("minLift") Double minLift);
 
+    @EntityGraph(attributePaths = {"antecedents", "consequents"})
     @Query("SELECT DISTINCT r FROM AssociationRule r " +
            "JOIN r.antecedents a " +
            "WHERE r.miningRun.id = :miningRunId " +

@@ -146,8 +146,8 @@ Tài liệu này được biên soạn chi tiết và đầy đủ để phục 
 
 ### Câu 17: Vì sao FP-Growth được lựa chọn làm mô hình khuyến nghị?
 * **Trả lời**:
-  * **Tương thích kết quả 100%**: Trên tập dữ liệu thực tế 31,049 transactions, cả Apriori và FP-Growth cho ra tập mục phổ biến và tập luật kết hợp trùng khớp hoàn toàn (Độ tương đồng Jaccard = 100.0%, các chỉ số Support, Confidence, Lift giống hệt nhau).
-  * **Tốc độ vượt trội**: Ở ngưỡng $\text{minSupport}=0.01$, FP-Growth đạt thời gian trung vị **~83 ms**, nhanh hơn **3.88 lần** so với Apriori (~322 ms).
+  * **Tương thích kết quả 100%**: Trên tập dữ liệu thực tế 31,049 transactions, cả Apriori và FP-Growth cho ra tập mục phổ biến và tập luật kết hợp trùng khớp hoàn toàn (Độ tương đồng Rule Jaccard = 100.0%, Itemset Jaccard = 100.0%, các chỉ số Support, Confidence, Lift giống hệt nhau).
+  * **Tốc độ vượt trội**: Qua quy trình đo lường chuẩn hóa 2 lượt warm-up và 5 lượt đo lường chính thức, ở ngưỡng $\text{minSupport}=0.01$, FP-Growth đạt thời gian trung vị **~46 ms (±5.2 ms)**, nhanh hơn **5.3 lần** so với Apriori (~243 ms ±33.5 ms).
   * **Khả năng mở rộng (Scalability)**: FP-Growth chỉ duyệt dữ liệu 2 lần và nén thông tin trong cây FP-Tree, không làm bùng nổ tổ hợp ứng viên $C_k$, giúp tối ưu RAM và an toàn cho hệ thống bệnh viện khi dữ liệu mở rộng quy mô lớn.
 
 ---

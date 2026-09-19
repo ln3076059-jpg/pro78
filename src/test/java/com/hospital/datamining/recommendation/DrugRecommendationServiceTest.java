@@ -138,4 +138,40 @@ class DrugRecommendationServiceTest {
         assertEquals("Pantoprazole", recs.get(1).getDrug(),
                 "Luật đơn phần tử {Aspirin} -> Pantoprazole được bổ sung tiếp theo");
     }
+
+    @Test
+    @DisplayName("Kiểm tra gợi ý kê đơn truy vấn trực tiếp bằng Medicine ID qua quan hệ association_rule_antecedents")
+    void testRecommendByMedicineIdsDirectQuery() {
+        MiningRun fakeRun = MiningRun.builder().id(1L).algorithm("FP_GROWTH").status("SUCCESS").build();
+        Mockito.when(miningRunService.getActiveMiningRun()).thenReturn(Optional.of(fakeRun));
+        Mockito.when(miningRunService.getLatestSuccessfulRun()).thenReturn(Optional.of(fakeRun));
+
+        Medicine medAspirin = Medicine.builder().id(10L).genericName("Aspirin").build();
+        Medicine medMetoprolol = Medicine.builder().id(20L).genericName("Metoprolol").build();
+        Mockito.when(medicineRepository.findAllById(Collections.singletonList(10L)))
+                .thenReturn(Collections.singletonList(medAspirin));
+        Mockito.when(medicineRepository.findByGenericNameIgnoreCase("Metoprolol"))
+                .thenReturn(Optional.of(medMetoprolol));
+
+        AssociationRule r = AssociationRule.builder()
+                .id(301L)
+                .antecedent("Aspirin")
+                .consequent("Metoprolol")
+                .support(0.12)
+                .confidence(0.70)
+                .lift(1.40)
+                .build();
+
+        Mockito.when(ruleRepository.findRulesByAntecedentMedicineIds(eq(1L), eq(Collections.singletonList(10L)), anyDouble(), anyDouble()))
+                .thenReturn(Collections.singletonList(r));
+
+        List<RecommendationResponseDTO> recs = recommendationService.recommendByMedicineIds(
+                Collections.singletonList(10L), 5
+        );
+
+        assertNotNull(recs);
+        assertEquals(1, recs.size());
+        assertEquals("Metoprolol", recs.get(0).getDrug());
+        assertEquals(20L, recs.get(0).getMedicineId());
+    }
 }

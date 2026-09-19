@@ -49,7 +49,8 @@ public class DrugRecommendationService {
     }
 
     /**
-     * Gợi ý các thuốc thường được kê cùng dựa trên danh sách ID thuốc hiện có trong đơn
+     * Gợi ý các thuốc thường được kê cùng dựa trên danh sách ID thuốc hiện có trong đơn.
+     * Tối ưu hóa hiệu năng: Truy vấn trực tiếp qua quan hệ association_rule_antecedents.medicine_id
      */
     public List<RecommendationResponseDTO> recommendByMedicineIds(List<Long> medicineIds, int topN) {
         if (medicineIds == null || medicineIds.isEmpty()) {
@@ -59,9 +60,36 @@ public class DrugRecommendationService {
         List<Medicine> medicines = medicineRepository.findAllById(medicineIds);
         List<String> drugNames = new ArrayList<>();
         for (Medicine m : medicines) {
-            drugNames.add(m.getGenericName());
+            if (m.getGenericName() != null) {
+                drugNames.add(m.getGenericName());
+            }
         }
 
+        Optional<MiningRun> activeRunOpt = miningRunService.getActiveMiningRun();
+        if (activeRunOpt.isEmpty()) {
+            activeRunOpt = miningRunService.getLatestSuccessfulRun();
+        }
+        if (activeRunOpt.isEmpty()) {
+            log.warn("Chưa có Active MiningRun nào được kích hoạt để gợi ý thuốc!");
+            return Collections.emptyList();
+        }
+
+        MiningRun run = activeRunOpt.get();
+        int limit = topN > 0 ? topN : 5;
+
+        // 1. Thử truy vấn tối ưu trực tiếp theo association_rule_antecedents.medicine_id
+        List<AssociationRule> directRules = Collections.emptyList();
+        try {
+            directRules = ruleRepository.findRulesByAntecedentMedicineIds(run.getId(), medicineIds, 0.10, 1.0);
+        } catch (Exception e) {
+            log.debug("findRulesByAntecedentMedicineIds fallback: {}", e.getMessage());
+        }
+
+        if (directRules != null && !directRules.isEmpty()) {
+            return evaluateCandidateRules(directRules, drugNames, limit);
+        }
+
+        // 2. Fallback: Nếu các luật cũ chưa map medicine_id, gọi recommendByDrugNames
         return recommendByDrugNames(drugNames, topN);
     }
 
@@ -107,10 +135,36 @@ public class DrugRecommendationService {
 
         MiningRun run = activeRunOpt.get();
 
-        // 2. Lấy danh sách luật có confidence cao và lift > 1.0 (Lift > 1 biểu thị đồng xuất hiện tích cực)
-        List<AssociationRule> candidateRules = ruleRepository.findTopConfidentRules(run.getId(), 0.10, 1.0);
+        // 2. Ưu tiên truy vấn trực tiếp theo bảng chuẩn hóa association_rule_antecedents
+        List<AssociationRule> candidateRules = Collections.emptyList();
+        try {
+            candidateRules = ruleRepository.findRulesByAntecedentDrugNames(run.getId(), normalizedSelected, 0.10, 1.0);
+        } catch (Exception e) {
+            log.debug("findRulesByAntecedentDrugNames query fallback: {}", e.getMessage());
+        }
 
-        // 3. Khớp tiền đề theo 2 tầng:
+        // Nếu bảng antecedents chưa có dữ liệu hoặc truy vấn trống, fallback sang findTopConfidentRules
+        if (candidateRules == null || candidateRules.isEmpty()) {
+            candidateRules = ruleRepository.findTopConfidentRules(run.getId(), 0.10, 1.0);
+        }
+
+        return evaluateCandidateRules(candidateRules, selectedDrugs, limit);
+    }
+
+    /**
+     * Thuật toán lọc và xếp hạng gợi ý 2 tầng (Two-tier ranking)
+     */
+    private List<RecommendationResponseDTO> evaluateCandidateRules(List<AssociationRule> candidateRules,
+                                                                   List<String> selectedDrugs,
+                                                                   int limit) {
+        Set<String> normalizedSelected = new HashSet<>();
+        for (String d : selectedDrugs) {
+            if (d != null && !d.trim().isEmpty()) {
+                normalizedSelected.add(d.trim().toLowerCase());
+            }
+        }
+
+        // Khớp tiền đề theo 2 tầng:
         // Tier 1: Multi-item antecedent subset: Antecedent size >= 2 AND Antecedent ⊆ selectedDrugs
         // Tier 2: Single-item antecedent subset: Antecedent size == 1 AND Antecedent ⊆ selectedDrugs
         Map<String, RecommendationResponseDTO> tier1Recommendations = new HashMap<>();

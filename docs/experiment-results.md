@@ -40,25 +40,25 @@ Từ 101,766 lượt nằm viện (encounters) trong tệp dữ liệu gốc `di
 
 ## 3. Bảng So Sánh Hiệu Năng Đối Đầu: Apriori vs FP-Growth
 
-Thực nghiệm đo lường lặp 5 lần (Median Runtime) trên toàn bộ **31,049 transactions** với cố định ngưỡng $\text{minConfidence} = 0.30$ ($30\%$), $\text{minLift} = 1.0$, $\text{maxItemsetSize} = 5$ qua các ngưỡng $\text{minSupport}$ khác nhau:
+Thực nghiệm đo lường chuẩn hóa đa lượt (2 lượt warm-up + 5 lượt đo lường chính thức lấy **Median Runtime** và **StdDev**) trên toàn bộ **31,049 transactions** với cố định ngưỡng $\text{minConfidence} = 0.30$ ($30\%$), $\text{minLift} = 1.0$, $\text{maxItemsetSize} = 5$ qua các ngưỡng $\text{minSupport}$ khác nhau:
 
-| Thuật toán | Số lượng Giao dịch | Ngưỡng Support | Ngưỡng Conf | Thời gian trung vị (Median Runtime) | Bộ nhớ ước lượng (Heap Delta) | Số tập phổ biến (Itemsets) | Số luật kết hợp (Rules) | Độ trùng khớp luật (Jaccard) |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Apriori** | 31,049 | **0.01 (1%)** | 0.30 | 322 ms | ~24.16 MB | **45** | **3** | **100.0%** |
-| **FP-Growth** | 31,049 | **0.01 (1%)** | 0.30 | **83 ms** | **~9.00 MB** | **45** | **3** | **100.0%** |
-| **Apriori** | 31,049 | **0.02 (2%)** | 0.30 | 153 ms | ~27.17 MB | **31** | **2** | **100.0%** |
-| **FP-Growth** | 31,049 | **0.02 (2%)** | 0.30 | **50 ms** | **~8.00 MB** | **31** | **2** | **100.0%** |
-| **Apriori** | 31,049 | **0.05 (5%)** | 0.30 | 96 ms | ~4.04 MB | **19** | **1** | **100.0%** |
-| **FP-Growth** | 31,049 | **0.05 (5%)** | 0.30 | **39 ms** | **~7.50 MB** | **19** | **1** | **100.0%** |
-| **Apriori** | 31,049 | **0.10 (10%)**| 0.30 | 78 ms | ~35.50 MB | **14** | **1** | **100.0%** |
-| **FP-Growth** | 31,049 | **0.10 (10%)**| 0.30 | **40 ms** | **~7.50 MB** | **14** | **1** | **100.0%** |
+| Thuật toán | Số lượng Giao dịch | Ngưỡng Support | Ngưỡng Conf | Thời gian trung vị (Median Runtime) | Bộ nhớ ước lượng (Heap Delta) | Số tập phổ biến (Itemsets) | Số luật kết hợp (Rules) | Rule Jaccard | Itemset Jaccard |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Apriori** | 31,049 | **0.01 (1%)** | 0.30 | 243 ms (±33.5 ms) | ~8.02 MB | **45** | **3** | **100.0%** | **100.0%** |
+| **FP-Growth** | 31,049 | **0.01 (1%)** | 0.30 | **46 ms (±5.2 ms)** | **~8.00 MB** | **45** | **3** | **100.0%** | **100.0%** |
+| **Apriori** | 31,049 | **0.02 (2%)** | 0.30 | 142 ms (±11.9 ms) | ~21.01 MB | **31** | **2** | **100.0%** | **100.0%** |
+| **FP-Growth** | 31,049 | **0.02 (2%)** | 0.30 | **43 ms (±3.5 ms)** | **~8.00 MB** | **31** | **2** | **100.0%** | **100.0%** |
+| **Apriori** | 31,049 | **0.05 (5%)** | 0.30 | 98 ms (±8.3 ms) | ~38.00 MB | **19** | **1** | **100.0%** | **100.0%** |
+| **FP-Growth** | 31,049 | **0.05 (5%)** | 0.30 | **39 ms (±2.8 ms)** | **~7.50 MB** | **19** | **1** | **100.0%** | **100.0%** |
+| **Apriori** | 31,049 | **0.10 (10%)**| 0.30 | 86 ms (±3.4 ms) | ~35.50 MB | **14** | **1** | **100.0%** | **100.0%** |
+| **FP-Growth** | 31,049 | **0.10 (10%)**| 0.30 | **35 ms (±1.1 ms)** | **~7.50 MB** | **14** | **1** | **100.0%** | **100.0%** |
 
 ---
 
 ## 4. Kiểm thử Tương Thích & Tính Nhất Quán Giữa Hai Thuật Toán
 
 Kết quả kiểm thử đối chiếu tuyệt đối từ `ExactEquivalenceTest` và `MiningEvaluationServiceTest` khẳng định:
-1. **Độ tương đồng tập luật Jaccard đạt 100%**: Tại mọi ngưỡng thử nghiệm, chỉ số Jaccard Similarity giữa hai tập luật sinh bởi Apriori và FP-Growth đều đạt mức $1.0$ ($100.0\%$).
+1. **Độ tương đồng tập luật Jaccard đạt 100%**: Tại mọi ngưỡng thử nghiệm, chỉ số Rule Jaccard Similarity và Itemset Jaccard Similarity giữa hai tập sinh bởi Apriori và FP-Growth đều đạt mức $1.0$ ($100.0\%$).
 2. **Khớp từng phần tử và tần suất hỗ trợ (Support Count)**: Danh sách các itemset cùng chỉ số support count tuyệt đối của từng tập mục sinh ra từ Apriori và FP-Growth hoàn toàn trùng khớp chính xác từng phần tử.
 3. **Độ tin cậy toán học**: Cả 3 chỉ số $\text{Support}$, $\text{Confidence}$, $\text{Lift}$ giữa các luật đối ứng đều bằng nhau trong giới hạn sai số số thực $\epsilon = 10^{-6}$.
 
@@ -81,8 +81,8 @@ Tại ngưỡng $\text{minSupport} = 0.01$ ($1\%$), $\text{minConfidence} = 0.30
 1. **Khi giảm $\text{minSupport}$ từ $0.10 \to 0.01$**:
    * Số lượng tập phổ biến tăng từ 14 lên 45 tập.
    * Số lượng luật kết hợp tìm được tăng từ 1 lên 3 luật.
-   * Thời gian chạy của Apriori tăng từ 78 ms lên 322 ms (tăng hơn 4 lần) do số lượng tổ hợp ứng viên $C_k$ cần kiểm tra tăng vọt.
-   * Thời gian chạy của FP-Growth chỉ tăng từ 40 ms lên 83 ms (tăng khoảng 2 lần), cho thấy độ ổn định cao hơn hẳn khi ngưỡng hỗ trợ giảm thấp.
+   * Thời gian chạy của Apriori tăng từ 86 ms lên 243 ms (tăng gần 3 lần, độ phân tán thời gian tăng với StdDev ±33.5 ms) do số lượng tổ hợp ứng viên $C_k$ cần kiểm tra tăng vọt.
+   * Thời gian chạy của FP-Growth chỉ tăng từ 35 ms lên 46 ms (chỉ tăng 1.3 lần, StdDev rất thấp ±5.2 ms), cho thấy độ ổn định cao hơn hẳn khi ngưỡng hỗ trợ giảm thấp.
 2. **Khoảng ngưỡng khuyến nghị trong thực tế**:
    * Với bộ dữ liệu UCI Diabetes, việc phối hợp thuốc tập trung vào một số nhóm thuốc chủ lực (Insulin, Metformin, Glyburide, Glipizide). Ngưỡng $\text{minSupport} \in [0.01, 0.02]$ và $\text{minConfidence} \in [0.30, 0.50]$ là khoảng tham số phù hợp để vừa khám phá được các mẫu đồng sử dụng thuốc có ý nghĩa thực tế, vừa tránh bùng nổ tổ hợp ứng viên.
 
@@ -95,12 +95,12 @@ Hệ thống chính thức đề xuất và lựa chọn **Thuật toán FP-Grow
 
 ### 7.2. Cơ sở lý do khoa học dựa trên thực nghiệm:
 1. **Tốc độ vượt trội (Runtime)**:
-   * Tại ngưỡng $\text{minSupport} = 0.01$, FP-Growth (83 ms) nhanh hơn **gần 4 lần** so với Apriori (322 ms).
+   * Tại ngưỡng $\text{minSupport} = 0.01$, FP-Growth (46 ms) nhanh hơn **5.3 lần** so với Apriori (243 ms).
    * Bản chất: Apriori sinh tổ hợp ứng viên $C_k$ khổng lồ và quét dữ liệu nhiều lượt; FP-Growth chỉ quét 2 lần và nén thông tin vào cây FP-Tree.
 2. **Khả năng mở rộng (Scalability)**:
-   * Khi quy mô dữ liệu kê đơn bệnh viện mở rộng lên hàng triệu bản ghi, FP-Growth với cơ chế cây tiền tố điều kiện (Conditional FP-Tree) giúp duy trì hiệu năng cao mà không gây nghẽn I/O quét dữ liệu.
+   * Khi quy mô dữ liệu kê đơn bệnh viện mở rộng lên hàng triệu bản ghi, FP-Growth với cơ chế cây tiền tố điều kiện (Conditional FP-Tree) giúp duy trì hiệu năng cao mà không gây nghên I/O quét dữ liệu.
 3. **Chất lượng luật tương đương**:
-   * Jaccard Similarity đạt 100%, kết quả tập phổ biến hoàn toàn trùng khớp giữa 2 thuật toán.
+   * Rule Jaccard và Itemset Jaccard Similarity đều đạt 100.0%, kết quả tập phổ biến hoàn toàn trùng khớp giữa 2 thuật toán.
 
 ---
 

@@ -129,8 +129,8 @@ Triển khai hai thuật toán khai phá luật kết hợp độc lập thuần
 
 ### 6.2. Kết quả Thực nghiệm & Lựa chọn Thuật toán
 Trên tập dữ liệu đầy đủ 31,049 transactions của UCI Diabetes 130-US Hospitals (được đo đạc khoa học qua 2 lần warm-up và 5 lần đo chính thức để lấy thời gian trung vị - Median Runtime):
-* Hai thuật toán sinh ra số lượng tập phổ biến và luật kết hợp **tương thích hoàn toàn** (Độ tương đồng Jaccard = 100.0%) tại mọi ngưỡng $\text{minSupport}$.
-* **FP-Growth vượt trội hoàn toàn về tốc độ thực thi**: Nhanh hơn Apriori từ **3.5 đến 4.2 lần** (ở $\text{minSupport}=0.01$, FP-Growth chỉ mất ~83 ms trung vị trong khi Apriori mất ~322 ms).
+* Hai thuật toán sinh ra số lượng tập phổ biến và luật kết hợp **tương thích hoàn toàn** (Độ tương đồng Rule Jaccard = 100.0%, Itemset Jaccard = 100.0%) tại mọi ngưỡng $\text{minSupport}$.
+* **FP-Growth vượt trội hoàn toàn về tốc độ thực thi**: Nhanh hơn Apriori từ **2.5 đến 5.3 lần** (ở $\text{minSupport}=0.01$, FP-Growth chỉ mất ~46 ms trung vị trong khi Apriori mất ~243 ms).
 * **Khả năng sử dụng bộ nhớ**: FP-Growth tiêu thụ ít heap delta hơn đáng kể nhờ cấu trúc cây nén FP-Tree và không phát sinh tập ứng viên trung gian $C_k$.
 * **Kết luận khoa học**: FP-Growth được khuyến nghị làm thuật toán ưu tiên cho hệ thống và quản trị viên có thể kích hoạt làm **Active Model** cho phân hệ kê đơn.
 

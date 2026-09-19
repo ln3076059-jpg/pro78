@@ -217,25 +217,26 @@ Module `MiningEvaluationService` thực hiện so sánh khoa học đối đầu
   $$\text{Jaccard Similarity} = \frac{|A \cap B|}{|A \cup B|}$$
 
 ### Bảng Kết Quả Đo Lường Thực Tế từ Dataset Đầy Đủ (31,049 Transactions):
+*(Quy trình đo lường chuẩn hóa: 2 lượt warm-up + 5 lượt đo lường chính thức lấy thời gian trung vị Median Runtime và độ lệch chuẩn StdDev)*
 
-| Thuật toán | Giao dịch | Support | Confidence | Median Runtime | Approx RAM | Tập phổ biến | Luật kết hợp | Jaccard Overlap |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Apriori** | 31,049 | **0.01 (1%)** | 0.30 | 322 ms | ~24.16 MB | **45** | **3** | **100.0%** |
-| **FP-Growth** | 31,049 | **0.01 (1%)** | 0.30 | **83 ms** | **~9.00 MB** | **45** | **3** | **100.0%** |
-| **Apriori** | 31,049 | **0.02 (2%)** | 0.30 | 153 ms | ~27.17 MB | **31** | **2** | **100.0%** |
-| **FP-Growth** | 31,049 | **0.02 (2%)** | 0.30 | **50 ms** | **~8.00 MB** | **31** | **2** | **100.0%** |
-| **Apriori** | 31,049 | **0.05 (5%)** | 0.30 | 96 ms | ~4.04 MB | **19** | **1** | **100.0%** |
-| **FP-Growth** | 31,049 | **0.05 (5%)** | 0.30 | **39 ms** | **~7.50 MB** | **19** | **1** | **100.0%** |
-| **Apriori** | 31,049 | **0.10 (10%)**| 0.30 | 78 ms | ~35.50 MB | **14** | **1** | **100.0%** |
-| **FP-Growth** | 31,049 | **0.10 (10%)**| 0.30 | **40 ms** | **~7.50 MB** | **14** | **1** | **100.0%** |
+| Thuật toán | Giao dịch | Support | Confidence | Median Runtime | Approx RAM | Tập phổ biến | Luật kết hợp | Rule Jaccard | Itemset Jaccard |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Apriori** | 31,049 | **0.01 (1%)** | 0.30 | 243 ms (±33.5 ms) | ~8.02 MB | **45** | **3** | **100.0%** | **100.0%** |
+| **FP-Growth** | 31,049 | **0.01 (1%)** | 0.30 | **46 ms (±5.2 ms)** | **~8.00 MB** | **45** | **3** | **100.0%** | **100.0%** |
+| **Apriori** | 31,049 | **0.02 (2%)** | 0.30 | 142 ms (±11.9 ms) | ~21.01 MB | **31** | **2** | **100.0%** | **100.0%** |
+| **FP-Growth** | 31,049 | **0.02 (2%)** | 0.30 | **43 ms (±3.5 ms)** | **~8.00 MB** | **31** | **2** | **100.0%** | **100.0%** |
+| **Apriori** | 31,049 | **0.05 (5%)** | 0.30 | 98 ms (±8.3 ms) | ~38.00 MB | **19** | **1** | **100.0%** | **100.0%** |
+| **FP-Growth** | 31,049 | **0.05 (5%)** | 0.30 | **39 ms (±2.8 ms)** | **~7.50 MB** | **19** | **1** | **100.0%** | **100.0%** |
+| **Apriori** | 31,049 | **0.10 (10%)**| 0.30 | 86 ms (±3.4 ms) | ~35.50 MB | **14** | **1** | **100.0%** | **100.0%** |
+| **FP-Growth** | 31,049 | **0.10 (10%)**| 0.30 | **35 ms (±1.1 ms)** | **~7.50 MB** | **14** | **1** | **100.0%** | **100.0%** |
 
 ---
 
 # 18. LỰA CHỌN THUẬT TOÁN & ACTIVE MODEL
 
-Dựa trên kết quả đo lường thực nghiệm khoa học, hệ thống chính thức lựa chọn **FP-Growth** làm thuật toán khuyến nghị cốt lõi:
-1. **Kiểm chứng tương thích đầu ra**: Cả hai thuật toán đều cho ra kết quả tập mục phổ biến và luật kết hợp tương thích hoàn toàn (Jaccard Similarity = 100.0%).
-2. **Thời gian thực thi trung vị**: FP-Growth nhanh hơn Apriori **3.88 lần** ở $\text{minSupport}=0.01$ (83 ms so với 322 ms).
+Dựa trên kết quả đo lường thực nghiệm khoa học qua nhiều lượt đo lặp, hệ thống chính thức lựa chọn **FP-Growth** làm thuật toán khuyến nghị cốt lõi:
+1. **Kiểm chứng tương thích đầu ra**: Cả hai thuật toán đều cho ra kết quả tập mục phổ biến và luật kết hợp tương thích hoàn toàn (Rule Jaccard = 100.0%, Itemset Jaccard = 100.0%).
+2. **Thời gian thực thi trung vị**: FP-Growth nhanh hơn Apriori **5.3 lần** ở $\text{minSupport}=0.01$ (46 ms so với 243 ms) và độ ổn định cao hơn (StdDev ±5.2 ms so với ±33.5 ms).
 3. **Khả năng mở rộng**: FP-Growth chỉ quét CSDL 2 lần và không sinh hàng nghìn tập ứng viên trung gian $C_k$, tiết kiệm bộ nhớ và tránh nghẽn I/O khi dữ liệu tăng trưởng.
 4. **Cơ chế kích hoạt Active Model**: Quản trị viên có thể chỉ định mô hình chạy tối ưu làm Active Model (`selected_for_recommendation = true`) thông qua giao diện `/mining/history` hoặc REST API.
 
@@ -244,11 +245,11 @@ Dựa trên kết quả đo lường thực nghiệm khoa học, hệ thống ch
 # 19. CƠ SỞ DỮ LIỆU (DATABASE SCHEMA)
 
 CSDL MySQL đồng nhất tên **`hospital_drug_mining`** gồm 21 bảng được chuẩn hóa:
-* Quản trị: `users`, `roles`, `user_roles`.
+* Quản trị: `users` (chứa `role_id`), `roles`.
 * Lâm sàng: `patients`, `doctors`, `medical_visits`, `medicines`, `prescriptions`, `prescription_items`.
 * Tiền xử lý & Nạp dữ liệu: `dataset_imports`, `dataset_statistics`.
 * Giao dịch: `transactions`, `transaction_items`.
-* Khai phá dữ liệu: `mining_runs` (gắn khóa ngoại `dataset_import_id` và cờ `selected_for_recommendation`), `frequent_itemsets`, `frequent_itemset_items`, `association_rules`, `association_rule_antecedents`, `association_rule_consequents`.
+* Khai phá dữ liệu: `mining_runs` (gắn khóa ngoại `dataset_import_id` và cờ `selected_for_recommendation`), `frequent_itemsets`, `frequent_itemset_items`, `association_rules`, `association_rule_items`, `association_rule_antecedents`, `association_rule_consequents`.
 * Đánh giá & Tương tác: `algorithm_benchmarks`, `drug_interactions`.
 
 > **Thiết kế tiền tố / hệ quả chuẩn hóa**: `association_rule_antecedents` và `association_rule_consequents` lưu từng `medicine_id` độc lập (thay vì chuỗi gộp), giúp tìm kiếm luật bằng Indexing cực nhanh theo thời gian thực khi bác sĩ kê đơn.

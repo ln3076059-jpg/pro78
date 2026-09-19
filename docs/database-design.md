@@ -14,8 +14,7 @@ Cơ sở dữ liệu của hệ thống được thiết kế theo chuẩn **3NF
 
 ```mermaid
 erDiagram
-    users ||--o{ user_roles : has
-    roles ||--o{ user_roles : assigned_to
+    roles ||--o{ users : assigns
 
     doctors ||--o{ medical_visits : conducts
     patients ||--o{ medical_visits : attends
@@ -48,6 +47,11 @@ erDiagram
 
 ### 3.1. Phân hệ Quản trị & Người dùng
 
+#### Bảng `roles`
+* `id` (BIGINT, PK, AUTO_INCREMENT): Mã vai trò
+* `name` (VARCHAR(50), NOT NULL, UNIQUE): Tên vai trò (`ROLE_ADMIN`, `ROLE_DOCTOR`)
+* `description` (VARCHAR(255)): Mô tả quyền hạn vai trò
+
 #### Bảng `users`
 Lưu trữ tài khoản người dùng đăng nhập hệ thống.
 * `id` (BIGINT, PK, AUTO_INCREMENT): Khóa chính
@@ -56,12 +60,9 @@ Lưu trữ tài khoản người dùng đăng nhập hệ thống.
 * `full_name` (VARCHAR(100), NOT NULL): Họ và tên đầy đủ
 * `email` (VARCHAR(100)): Địa chỉ email
 * `phone` (VARCHAR(20)): Số điện thoại
+* `role_id` (BIGINT, NOT NULL, FK -> roles.id): Vai trò của người dùng
 * `enabled` (BOOLEAN, DEFAULT TRUE): Trạng thái kích hoạt tài khoản
 * `created_at`, `updated_at` (DATETIME): Dấu thời gian
-
-#### Bảng `roles` & `user_roles`
-* `roles`: `id`, `name` (ROLE_ADMIN, ROLE_DOCTOR), `description`
-* `user_roles`: `user_id` (FK), `role_id` (FK)
 
 ---
 

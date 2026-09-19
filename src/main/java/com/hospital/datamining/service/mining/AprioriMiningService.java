@@ -20,6 +20,9 @@ public class AprioriMiningService implements AssociationMiningService {
 
     @Override
     public MiningResult mine(List<Set<String>> transactions, MiningParameters parameters) {
+        java.util.Objects.requireNonNull(parameters, "MiningParameters không được null");
+        parameters.validate();
+
         long startTime = System.currentTimeMillis();
         Runtime runtime = Runtime.getRuntime();
         runtime.gc();
@@ -34,9 +37,6 @@ public class AprioriMiningService implements AssociationMiningService {
                     .uniqueDrugCount(0)
                     .build();
         }
-
-        java.util.Objects.requireNonNull(parameters, "MiningParameters không được null");
-        parameters.validate();
 
         int totalTransactions = transactions.size();
         double minSupport = parameters.getMinSupport();

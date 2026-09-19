@@ -206,8 +206,12 @@ public class MiningRunService {
         if (optRun.isEmpty()) {
             return false;
         }
-        miningRunRepository.resetAllSelectedForRecommendation();
         MiningRun target = optRun.get();
+        if (!"SUCCESS".equalsIgnoreCase(target.getStatus())) {
+            log.warn("MiningRunService: Không thể kích hoạt MiningRun #{} vì trạng thái không phải SUCCESS ({})", runId, target.getStatus());
+            return false;
+        }
+        miningRunRepository.resetAllSelectedForRecommendation();
         target.setSelectedForRecommendation(true);
         miningRunRepository.save(target);
         log.info("MiningRunService: Đã kích hoạt MiningRun #{} ({}) làm Active Model cho chức năng kê đơn!",

@@ -62,6 +62,9 @@ public class AlgorithmBenchmark {
     @Column(name = "rule_overlap_percentage")
     private Double ruleOverlapPercentage;
 
+    @Column(name = "itemset_overlap_percentage")
+    private Double itemsetOverlapPercentage;
+
     @Column(name = "recommended_algorithm", length = 50)
     private String recommendedAlgorithm;
 

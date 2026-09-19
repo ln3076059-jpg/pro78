@@ -75,4 +75,16 @@ class ActiveMiningRunTest {
         assertTrue(active.isPresent());
         assertEquals(5L, active.get().getId());
     }
+
+    @Test
+    @DisplayName("Từ chối kích hoạt model nếu trạng thái không phải SUCCESS (Req #29)")
+    void testSetActiveMiningRunRejectsNonSuccess() {
+        MiningRun failedRun = MiningRun.builder().id(3L).algorithm("APRIORI").status("FAILED").selectedForRecommendation(false).build();
+        Mockito.when(miningRunRepository.findById(3L)).thenReturn(Optional.of(failedRun));
+
+        boolean result = miningRunService.setActiveMiningRun(3L);
+
+        assertFalse(result, "Không được phép kích hoạt MiningRun có status khác SUCCESS");
+        Mockito.verify(miningRunRepository, Mockito.never()).resetAllSelectedForRecommendation();
+    }
 }

@@ -37,9 +37,8 @@ public class FPGrowthMiningService implements AssociationMiningService {
                     .build();
         }
 
-        if (parameters != null) {
-            parameters.validate();
-        }
+        java.util.Objects.requireNonNull(parameters, "MiningParameters không được null");
+        parameters.validate();
 
         int totalTransactions = transactions.size();
         double minSupport = parameters.getMinSupport();

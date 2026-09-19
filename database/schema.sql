@@ -303,6 +303,7 @@ CREATE TABLE IF NOT EXISTS algorithm_benchmarks (
     apriori_memory_mb DOUBLE,
     fpgrowth_memory_mb DOUBLE,
     rule_overlap_percentage DOUBLE,
+    itemset_overlap_percentage DOUBLE,
     recommended_algorithm VARCHAR(50),
     conclusion_notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP

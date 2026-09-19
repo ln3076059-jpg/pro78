@@ -90,4 +90,13 @@ class FPGrowthMiningServiceTest {
         assertEquals(0, res.getFrequentItemsetCount());
         assertEquals(0, res.getRuleCount());
     }
+
+    @Test
+    @DisplayName("Ném NullPointerException rõ ràng khi parameters là null (Req #18)")
+    void testNullMiningParametersThrowsException() {
+        List<Set<String>> transactions = Collections.singletonList(Collections.singleton("A"));
+        NullPointerException ex = assertThrows(NullPointerException.class, () ->
+                fpGrowthService.mine(transactions, null));
+        assertTrue(ex.getMessage().contains("không được null"));
+    }
 }

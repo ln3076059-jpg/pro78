@@ -7,7 +7,7 @@ import com.hospital.datamining.dto.RuleDTO;
 import com.hospital.datamining.entity.AssociationRule;
 import com.hospital.datamining.entity.MiningRun;
 import com.hospital.datamining.repository.AssociationRuleRepository;
-import com.hospital.datamining.service.importer.MimicImportService;
+import com.hospital.datamining.service.importer.DatasetImportService;
 import com.hospital.datamining.service.mining.AprioriMiningService;
 import com.hospital.datamining.service.mining.FPGrowthMiningService;
 import com.hospital.datamining.service.mining.MiningEvaluationService;
@@ -27,7 +27,7 @@ import java.util.Set;
 @RequestMapping("/api")
 public class ApiMiningController {
 
-    private final MimicImportService importService;
+    private final DatasetImportService importService;
     private final TransactionService transactionService;
     private final AprioriMiningService aprioriService;
     private final FPGrowthMiningService fpGrowthService;
@@ -35,7 +35,7 @@ public class ApiMiningController {
     private final MiningEvaluationService evaluationService;
     private final AssociationRuleRepository ruleRepository;
 
-    public ApiMiningController(MimicImportService importService,
+    public ApiMiningController(DatasetImportService importService,
                                TransactionService transactionService,
                                AprioriMiningService aprioriService,
                                FPGrowthMiningService fpGrowthService,
@@ -53,7 +53,7 @@ public class ApiMiningController {
 
     /**
      * POST /api/dataset/import
-     * Nhập file CSV MIMIC-III hoặc nạp bộ demo
+     * Nhập file CSV UCI Diabetes hoặc CSV tương thích
      */
     @PostMapping("/dataset/import")
     public ResponseEntity<PreprocessSummaryDTO> importDataset(
@@ -71,7 +71,7 @@ public class ApiMiningController {
 
     /**
      * POST /api/mining/preprocess
-     * Chạy lại tiền xử lý trên tập demo
+     * Chạy lại tiền xử lý trên tập UCI Diabetes mẫu
      */
     @PostMapping("/mining/preprocess")
     public ResponseEntity<PreprocessSummaryDTO> preprocess() {

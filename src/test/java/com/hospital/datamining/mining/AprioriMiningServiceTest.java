@@ -79,4 +79,13 @@ class AprioriMiningServiceTest {
         assertEquals(0, result.getFrequentItemsetCount());
         assertEquals(0, result.getRuleCount());
     }
+
+    @Test
+    @DisplayName("Ném NullPointerException rõ ràng khi parameters là null (Req #18)")
+    void testNullMiningParametersThrowsException() {
+        List<Set<String>> transactions = Collections.singletonList(Collections.singleton("A"));
+        NullPointerException ex = assertThrows(NullPointerException.class, () ->
+                aprioriService.mine(transactions, null));
+        assertTrue(ex.getMessage().contains("không được null"));
+    }
 }

@@ -98,8 +98,34 @@ public class MiningEvaluationService {
             jaccardOverlapPercentage = Math.round(((double) intersectRules.size() / unionRules.size()) * 10000.0) / 100.0;
         }
 
-        // 4. Kiểm tra tính tương đương của tập phổ biến (Frequent Itemset Equivalence)
-        boolean itemsetsEquivalent = (lastAprioriResult != null && lastFpResult != null &&
+        // 4. Đo độ tương đồng đối xứng tập phổ biến (Frequent Itemset Jaccard Similarity)
+        Set<String> aprioriItemsetSignatures = new HashSet<>();
+        if (lastAprioriResult != null) {
+            for (FrequentItemsetResult itemset : lastAprioriResult.getFrequentItemsets()) {
+                aprioriItemsetSignatures.add(itemset.getItemsAsString());
+            }
+        }
+
+        Set<String> fpItemsetSignatures = new HashSet<>();
+        if (lastFpResult != null) {
+            for (FrequentItemsetResult itemset : lastFpResult.getFrequentItemsets()) {
+                fpItemsetSignatures.add(itemset.getItemsAsString());
+            }
+        }
+
+        Set<String> unionItemsets = new HashSet<>(aprioriItemsetSignatures);
+        unionItemsets.addAll(fpItemsetSignatures);
+
+        Set<String> intersectItemsets = new HashSet<>(aprioriItemsetSignatures);
+        intersectItemsets.retainAll(fpItemsetSignatures);
+
+        double itemsetOverlapPercentage = 100.0;
+        if (!unionItemsets.isEmpty()) {
+            itemsetOverlapPercentage = Math.round(((double) intersectItemsets.size() / unionItemsets.size()) * 10000.0) / 100.0;
+        }
+
+        boolean itemsetsEquivalent = (itemsetOverlapPercentage >= 95.0) &&
+                (lastAprioriResult != null && lastFpResult != null &&
                 lastAprioriResult.getFrequentItemsetCount() == lastFpResult.getFrequentItemsetCount());
 
         // 5. Đánh giá lựa chọn thuật toán dựa trên cơ sở thực nghiệm khách quan
@@ -109,9 +135,9 @@ public class MiningEvaluationService {
         if (!itemsetsEquivalent || jaccardOverlapPercentage < 95.0) {
             recommendedAlgo = "CẦN RÀ SOÁT LẠI (DISCREPANCY)";
             conclusionNotes = String.format(
-                    "CẢNH BÁO: Phát hiện sự khác biệt giữa hai thuật toán (Độ tương đồng luật Jaccard: %.1f%%, Itemsets Apriori: %d vs FP-Growth: %d). " +
+                    "CẢNH BÁO: Phát hiện sự khác biệt giữa hai thuật toán (Độ tương đồng luật Jaccard: %.1f%%, Itemsets Jaccard: %.1f%%, Apriori: %d vs FP-Growth: %d). " +
                     "Cần kiểm tra lại các ngưỡng cắt tỉa và xử lý thứ tự sắp xếp item.",
-                    jaccardOverlapPercentage,
+                    jaccardOverlapPercentage, itemsetOverlapPercentage,
                     lastAprioriResult != null ? lastAprioriResult.getFrequentItemsetCount() : 0,
                     lastFpResult != null ? lastFpResult.getFrequentItemsetCount() : 0);
         } else if (fpGrowthMedianMs < aprioriMedianMs) {
@@ -121,16 +147,16 @@ public class MiningEvaluationService {
                     "Thực nghiệm qua %d lần đo lặp (sau 2 lần warm-up) ghi nhận FP-Growth nhanh hơn Apriori %.1fx " +
                     "(Thời gian trung vị Median: %d ms so với %d ms; StdDev: ±%.1f ms so với ±%.1f ms). " +
                     "Thuật toán tiết kiệm bộ nhớ nhờ cấu trúc nén cây tiền tố FP-Tree, không sinh tổ hợp ứng viên khổng lồ (candidate generation). " +
-                    "Độ trùng khớp tập luật Jaccard đạt %.1f%%, bảo đảm tính toàn vẹn toán học. " +
+                    "Độ trùng khớp tập luật Jaccard đạt %.1f%%, tập phổ biến Jaccard đạt %.1f%%, bảo đảm tính toàn vẹn toán học. " +
                     "Khuyến nghị sử dụng FP-Growth khi dữ liệu kê đơn bệnh viện mở rộng quy mô lớn.",
-                    iterations, speedup, fpGrowthMedianMs, aprioriMedianMs, fpGrowthStdDev, aprioriStdDev, jaccardOverlapPercentage);
+                    iterations, speedup, fpGrowthMedianMs, aprioriMedianMs, fpGrowthStdDev, aprioriStdDev, jaccardOverlapPercentage, itemsetOverlapPercentage);
         } else {
             recommendedAlgo = "Apriori";
             conclusionNotes = String.format(
                     "Trên tập dữ liệu kích thước nhỏ, Apriori hoàn thành với thời gian trung vị %d ms (so với %d ms của FP-Growth). " +
                     "Apriori có ưu điểm về tính tường minh (explainability) theo từng bước sinh ứng viên k-itemset. " +
-                    "Độ trùng khớp tập luật Jaccard đạt %.1f%%.",
-                    aprioriMedianMs, fpGrowthMedianMs, jaccardOverlapPercentage);
+                    "Độ trùng khớp tập luật Jaccard đạt %.1f%%, tập phổ biến Jaccard đạt %.1f%%.",
+                    aprioriMedianMs, fpGrowthMedianMs, jaccardOverlapPercentage, itemsetOverlapPercentage);
         }
 
         // 6. Lưu kết quả vào CSDL AlgorithmBenchmark
@@ -150,14 +176,15 @@ public class MiningEvaluationService {
                 .aprioriMemoryMb(lastAprioriResult != null ? lastAprioriResult.getMemoryUsageMb() : 0.0)
                 .fpgrowthMemoryMb(lastFpResult != null ? lastFpResult.getMemoryUsageMb() : 0.0)
                 .ruleOverlapPercentage(jaccardOverlapPercentage)
+                .itemsetOverlapPercentage(itemsetOverlapPercentage)
                 .recommendedAlgorithm(recommendedAlgo)
                 .conclusionNotes(conclusionNotes)
                 .build();
 
         benchmarkRepository.save(benchmark);
 
-        log.info("Benchmark hoàn tất! Apriori Median: {} ms, FP-Growth Median: {} ms, Jaccard Overlap: {}%. Thuật toán khuyến nghị: {}",
-                aprioriMedianMs, fpGrowthMedianMs, jaccardOverlapPercentage, recommendedAlgo);
+        log.info("Benchmark hoàn tất! Apriori Median: {} ms, FP-Growth Median: {} ms, Rule Jaccard: {}%, Itemset Jaccard: {}%. Thuật toán khuyến nghị: {}",
+                aprioriMedianMs, fpGrowthMedianMs, jaccardOverlapPercentage, itemsetOverlapPercentage, recommendedAlgo);
 
         return BenchmarkComparisonDTO.builder()
                 .datasetName(datasetName)
@@ -174,6 +201,7 @@ public class MiningEvaluationService {
                 .aprioriMemoryMb(lastAprioriResult != null ? lastAprioriResult.getMemoryUsageMb() : 0.0)
                 .fpgrowthMemoryMb(lastFpResult != null ? lastFpResult.getMemoryUsageMb() : 0.0)
                 .ruleOverlapPercentage(jaccardOverlapPercentage)
+                .itemsetOverlapPercentage(itemsetOverlapPercentage)
                 .recommendedAlgorithm(recommendedAlgo)
                 .conclusionNotes(conclusionNotes)
                 .build();

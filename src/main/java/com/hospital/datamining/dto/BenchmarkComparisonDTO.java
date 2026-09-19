@@ -27,6 +27,7 @@ public class BenchmarkComparisonDTO {
     private Double fpgrowthMemoryMb;
 
     private Double ruleOverlapPercentage;
+    private Double itemsetOverlapPercentage;
     private String recommendedAlgorithm;
     private String conclusionNotes;
 }

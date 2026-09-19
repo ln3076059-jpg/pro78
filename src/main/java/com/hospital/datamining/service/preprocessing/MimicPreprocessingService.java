@@ -3,6 +3,7 @@ package com.hospital.datamining.service.preprocessing;
 import com.hospital.datamining.dto.PreprocessSummaryDTO;
 import com.hospital.datamining.repository.DatasetImportRepository;
 import com.hospital.datamining.repository.DatasetStatisticsRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
@@ -16,6 +17,7 @@ public class MimicPreprocessingService {
     private final DataPreprocessingService preprocessingService;
     private final DrugNormalizationService drugNormalizationService;
 
+    @Autowired
     public MimicPreprocessingService(DataPreprocessingService preprocessingService) {
         this.preprocessingService = preprocessingService;
         this.drugNormalizationService = null;

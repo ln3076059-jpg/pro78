@@ -8,6 +8,7 @@ import com.hospital.datamining.repository.TransactionItemRepository;
 import com.hospital.datamining.repository.TransactionRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,11 +34,12 @@ public class TransactionBuilderService {
         this(normalizationService, transactionService, null, null, null);
     }
 
+    @Autowired
     public TransactionBuilderService(DrugNormalizationService normalizationService,
                                      TransactionService transactionService,
-                                     TransactionRepository transactionRepository,
-                                     TransactionItemRepository transactionItemRepository,
-                                     MedicineRepository medicineRepository) {
+                                     @Autowired(required = false) TransactionRepository transactionRepository,
+                                     @Autowired(required = false) TransactionItemRepository transactionItemRepository,
+                                     @Autowired(required = false) MedicineRepository medicineRepository) {
         this.normalizationService = normalizationService;
         this.transactionService = transactionService;
         this.transactionRepository = transactionRepository;

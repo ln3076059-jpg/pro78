@@ -10,6 +10,7 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,9 +48,10 @@ public class DataPreprocessingService {
     private final DatasetImportRepository datasetImportRepository;
     private final DatasetStatisticsRepository datasetStatisticsRepository;
 
+    @Autowired
     public DataPreprocessingService(TransactionBuilderService transactionBuilderService,
-                                   DatasetImportRepository datasetImportRepository,
-                                   DatasetStatisticsRepository datasetStatisticsRepository) {
+                                   @Autowired(required = false) DatasetImportRepository datasetImportRepository,
+                                   @Autowired(required = false) DatasetStatisticsRepository datasetStatisticsRepository) {
         this.transactionBuilderService = transactionBuilderService;
         this.datasetImportRepository = datasetImportRepository;
         this.datasetStatisticsRepository = datasetStatisticsRepository;

@@ -346,6 +346,17 @@ public class MiningController {
         return "mining/history";
     }
 
+    @PostMapping("/set-active/{id}")
+    public String setActiveModel(@PathVariable("id") Long runId, RedirectAttributes ra) {
+        boolean success = miningRunService.setActiveMiningRun(runId);
+        if (success) {
+            ra.addFlashAttribute("successMessage", "Đã kích hoạt mô hình #" + runId + " làm Active Model cho chức năng gợi ý kê đơn thuốc!");
+        } else {
+            ra.addFlashAttribute("errorMessage", "Không tìm thấy MiningRun với ID #" + runId);
+        }
+        return "redirect:/mining/history";
+    }
+
     // 9. Xuất dữ liệu CSV phục vụ báo cáo khoa học
     @GetMapping(value = "/export/rules", produces = "text/csv; charset=UTF-8")
     @ResponseBody

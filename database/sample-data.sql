@@ -4,7 +4,7 @@
 -- File: database/sample-data.sql
 -- =============================================================================
 
-USE hospital_mining_db;
+USE hospital_drug_mining;
 
 -- 1. Roles
 INSERT INTO roles (id, name, description) VALUES
@@ -82,13 +82,13 @@ INSERT INTO medical_visits (id, visit_code, patient_id, doctor_id, visit_date, s
 (3, 'VIS2026-003', 3, 2, '2026-09-19 10:15:00', 'Khát nhiều, tiểu đêm, phù nhẹ mu bàn chân', 1, 'HbA1c 8.4%, HA 145/90 mmHg', 'ACTIVE')
 ON DUPLICATE KEY UPDATE visit_code=VALUES(visit_code);
 
--- 8. Drug Interactions (FDA DDI / DailyMed - Dữ liệu tra cứu tương tác thuốc chuẩn)
+-- 8. Demo Drug Interaction Data (Dữ liệu tra cứu tương tác thuốc minh họa cho chức năng cảnh báo)
 INSERT INTO drug_interactions (id, drug_name_a, drug_name_b, interaction_status, severity, description, source) VALUES
-(1, 'Metformin', 'Furosemide', 'KNOWN', 'Moderate', 'Furosemide có thể làm tăng nồng độ Metformin trong huyết tương; cần theo dõi toan lactic máu và chức năng thận.', 'FDA DDI / DailyMed'),
-(2, 'Insulin', 'Metoprolol', 'KNOWN', 'Moderate', 'Thuốc chẹn beta như Metoprolol có thể che lấp các triệu chứng cảnh báo hạ đường huyết (như tim đập nhanh, run rẩy).', 'FDA DDI / DailyMed'),
-(3, 'Glipizide', 'Ciprofloxacin', 'KNOWN', 'Major', 'Kháng sinh quinolone phối hợp với sulfonylurea có thể gây hạ đường huyết nghiêm trọng đe dọa tính mạng.', 'FDA FAERS / DailyMed'),
-(4, 'Lisinopril', 'Potassium Chloride', 'KNOWN', 'Major', 'Thuốc ức chế men chuyển phối hợp chất bổ sung kali làm tăng nguy cơ tăng kali máu nghiêm trọng.', 'FDA DDI'),
-(5, 'Aspirin', 'Heparin', 'KNOWN', 'Major', 'Tăng nguy cơ xuất huyết tiêu hóa và chảy máu nghiêm trọng do tác dụng hiệp đồng chống đông máu.', 'FDA DDI'),
-(6, 'Metformin', 'Insulin', 'KNOWN', 'Minor', 'Phối hợp thường quy trong điều trị ĐTĐ type 2 mất bù; cần chỉnh liều insulin phù hợp để tránh hạ đường huyết.', 'FDA DDI / Clinical Guidelines'),
-(7, 'Glipizide', 'Metformin', 'KNOWN', 'Minor', 'Phối hợp phổ biến sulfonylurea và biguanide; kiểm soát tốt đường huyết với nguy cơ hạ đường huyết ở mức kiểm soát.', 'FDA DailyMed')
+(1, 'Metformin', 'Furosemide', 'KNOWN', 'Moderate', 'Furosemide có thể làm tăng nồng độ Metformin trong huyết tương; cần theo dõi toan lactic máu và chức năng thận.', 'Demo interaction knowledge base (DailyMed ref)'),
+(2, 'Insulin', 'Metoprolol', 'KNOWN', 'Moderate', 'Thuốc chẹn beta như Metoprolol có thể che lấp các triệu chứng cảnh báo hạ đường huyết (như tim đập nhanh, run rẩy).', 'Demo interaction knowledge base (DailyMed ref)'),
+(3, 'Glipizide', 'Ciprofloxacin', 'KNOWN', 'Major', 'Kháng sinh quinolone phối hợp với sulfonylurea có thể gây hạ đường huyết nghiêm trọng đe dọa tính mạng.', 'Demo interaction knowledge base (DailyMed ref)'),
+(4, 'Lisinopril', 'Potassium Chloride', 'KNOWN', 'Major', 'Thuốc ức chế men chuyển phối hợp chất bổ sung kali làm tăng nguy cơ tăng kali máu nghiêm trọng.', 'Demo interaction knowledge base (DailyMed ref)'),
+(5, 'Aspirin', 'Heparin', 'KNOWN', 'Major', 'Tăng nguy cơ xuất huyết tiêu hóa và chảy máu nghiêm trọng do tác dụng hiệp đồng chống đông máu.', 'Demo interaction knowledge base (DailyMed ref)'),
+(6, 'Metformin', 'Insulin', 'KNOWN', 'Minor', 'Phối hợp trong điều trị ĐTĐ type 2; cần chỉnh liều insulin phù hợp để tránh nguy cơ hạ đường huyết.', 'Demo interaction knowledge base (Clinical Guidelines ref)'),
+(7, 'Glipizide', 'Metformin', 'KNOWN', 'Minor', 'Đồng xuất hiện phổ biến sulfonylurea và biguanide; cần lưu ý theo dõi nguy cơ hạ đường huyết.', 'Demo interaction knowledge base (Clinical Guidelines ref)')
 ON DUPLICATE KEY UPDATE interaction_status=VALUES(interaction_status);

@@ -42,9 +42,9 @@ Bộ dữ liệu chính được sử dụng trong đồ án là:
 
 ---
 
-## 3. Danh mục 24 Cột Thuốc Điều Trị
+## 3. Danh mục 23 Cột Hoạt Chất Thuốc Điều Trị
 
-Trong bộ dữ liệu UCI, có 24 cột thuốc chuyên biệt cho điều trị đái tháo đường:
+Trong bộ dữ liệu UCI, có 23 cột thuốc chuyên biệt cho điều trị đái tháo đường (bên cạnh 2 thuộc tính quản trị: `diabetesMed` và `change`):
 1. `metformin` (Biguanide)
 2. `repaglinide` (Meglitinide)
 3. `nateglinide` (Meglitinide)

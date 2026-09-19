@@ -37,6 +37,10 @@ public class FPGrowthMiningService implements AssociationMiningService {
                     .build();
         }
 
+        if (parameters != null) {
+            parameters.validate();
+        }
+
         int totalTransactions = transactions.size();
         double minSupport = parameters.getMinSupport();
         double minConfidence = parameters.getMinConfidence();

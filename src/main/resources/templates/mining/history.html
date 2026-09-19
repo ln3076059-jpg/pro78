@@ -52,12 +52,12 @@
                                     <th class="text-center">Luật</th>
                                     <th class="text-center">Thời Gian</th>
                                     <th class="text-center">Bộ Nhớ</th>
-                                    <th class="text-center">Trạng Thái</th>
-                                    <th class="text-center" style="width: 140px;">Hành Động</th>
+                                    <th class="text-center">Mô Hình Kê Đơn</th>
+                                    <th class="text-center" style="width: 170px;">Hành Động</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr th:each="r : ${runs}">
+                                <tr th:each="r : ${runs}" th:classappend="${r.selectedForRecommendation} ? 'table-success' : ''">
                                     <td class="text-center font-monospace fw-bold" th:text="${'#' + r.id}">#1</td>
                                     <td>
                                         <span th:if="${r.algorithm == 'APRIORI'}" class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1">
@@ -83,16 +83,26 @@
                                     <td class="text-center small text-muted font-monospace"
                                         th:text="${r.memoryUsageMb != null ? #numbers.formatDecimal(r.memoryUsageMb, 1, 2) + ' MB' : 'N/A'}">2.5 MB</td>
                                     <td class="text-center">
-                                        <span class="badge bg-success" th:text="${r.status}">SUCCESS</span>
+                                        <span th:if="${r.selectedForRecommendation}" class="badge bg-success px-2 py-1 shadow-sm">
+                                            <i class="fas fa-check-circle me-1"></i> Active Model
+                                        </span>
+                                        <span th:unless="${r.selectedForRecommendation}" class="badge bg-secondary-subtle text-secondary border px-2 py-1">
+                                            Lưu trữ
+                                        </span>
                                     </td>
                                     <td class="text-center">
                                         <div class="btn-group btn-group-sm">
                                             <a th:href="@{/mining/rules(runId=${r.id})}" class="btn btn-outline-primary" title="Xem luật kết hợp">
-                                                <i class="fas fa-project-diagram"></i> Luật
+                                                <i class="fas fa-project-diagram"></i>
                                             </a>
                                             <a th:href="@{/mining/itemsets(runId=${r.id})}" class="btn btn-outline-secondary" title="Xem tập phổ biến">
                                                 <i class="fas fa-cubes"></i>
                                             </a>
+                                            <form th:unless="${r.selectedForRecommendation}" th:action="@{/mining/set-active/{id}(id=${r.id})}" method="post" class="d-inline">
+                                                <button type="submit" class="btn btn-outline-success" title="Đặt làm mô hình hoạt động cho Bác sĩ kê đơn">
+                                                    <i class="fas fa-toggle-on"></i> Chọn
+                                                </button>
+                                            </form>
                                         </div>
                                     </td>
                                 </tr>

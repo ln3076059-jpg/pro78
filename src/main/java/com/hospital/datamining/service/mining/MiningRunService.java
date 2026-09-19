@@ -25,6 +25,7 @@ public class MiningRunService {
     private final AssociationRuleAntecedentRepository antecedentRepository;
     private final AssociationRuleConsequentRepository consequentRepository;
     private final MedicineRepository medicineRepository;
+    private final DatasetImportRepository datasetImportRepository;
 
     public MiningRunService(MiningRunRepository miningRunRepository,
                             FrequentItemsetRepository frequentItemsetRepository,
@@ -33,7 +34,8 @@ public class MiningRunService {
                             AssociationRuleItemRepository associationRuleItemRepository,
                             AssociationRuleAntecedentRepository antecedentRepository,
                             AssociationRuleConsequentRepository consequentRepository,
-                            MedicineRepository medicineRepository) {
+                            MedicineRepository medicineRepository,
+                            @org.springframework.beans.factory.annotation.Autowired(required = false) DatasetImportRepository datasetImportRepository) {
         this.miningRunRepository = miningRunRepository;
         this.frequentItemsetRepository = frequentItemsetRepository;
         this.frequentItemsetItemRepository = frequentItemsetItemRepository;
@@ -42,6 +44,7 @@ public class MiningRunService {
         this.antecedentRepository = antecedentRepository;
         this.consequentRepository = consequentRepository;
         this.medicineRepository = medicineRepository;
+        this.datasetImportRepository = datasetImportRepository;
     }
 
     /**
@@ -49,15 +52,34 @@ public class MiningRunService {
      */
     @Transactional
     public MiningRun saveMiningRun(MiningResult result, MiningParameters params, String datasetSource) {
+        return saveMiningRun(result, params, datasetSource, null);
+    }
+
+    @Transactional
+    public MiningRun saveMiningRun(MiningResult result, MiningParameters params, String datasetSource, Long datasetImportId) {
         log.info("Lưu kết quả khai phá {} vào CSDL...", result.getAlgorithm());
+
+        DatasetImport linkedImport = null;
+        if (datasetImportRepository != null) {
+            if (datasetImportId != null) {
+                linkedImport = datasetImportRepository.findById(datasetImportId).orElse(null);
+            } else {
+                linkedImport = datasetImportRepository.findFirstByStatusOrderByCreatedAtDesc("COMPLETED").orElse(null);
+            }
+        }
 
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime startedAt = now.minusNanos(result.getRuntimeMs() * 1_000_000L);
+
+        // Kiểm tra xem đã có Active model chưa. Nếu chưa có model nào active, model thành công đầu tiên sẽ active.
+        boolean shouldBeActive = miningRunRepository.findFirstBySelectedForRecommendationTrueOrderByCreatedAtDesc().isEmpty();
 
         MiningRun run = MiningRun.builder()
                 .runName(result.getAlgorithm() + " - " + System.currentTimeMillis())
                 .algorithm(result.getAlgorithm())
                 .datasetSource(datasetSource)
+                .datasetImport(linkedImport)
+                .selectedForRecommendation(shouldBeActive)
                 .minSupport(params.getMinSupport())
                 .minConfidence(params.getMinConfidence())
                 .minLift(params.getMinLift())
@@ -162,6 +184,35 @@ public class MiningRunService {
      */
     public Optional<MiningRun> getLatestSuccessfulRun() {
         return miningRunRepository.findFirstByStatusOrderByCreatedAtDesc("SUCCESS");
+    }
+
+    /**
+     * Lấy mô hình đang hoạt động (Active Model) được chỉ định phục vụ kê đơn
+     */
+    public Optional<MiningRun> getActiveMiningRun() {
+        Optional<MiningRun> active = miningRunRepository.findFirstBySelectedForRecommendationTrueOrderByCreatedAtDesc();
+        if (active.isPresent()) {
+            return active;
+        }
+        return getLatestSuccessfulRun();
+    }
+
+    /**
+     * Đặt một MiningRun làm Active Model cho chức năng gợi ý kê đơn thuốc
+     */
+    @Transactional
+    public boolean setActiveMiningRun(Long runId) {
+        Optional<MiningRun> optRun = miningRunRepository.findById(runId);
+        if (optRun.isEmpty()) {
+            return false;
+        }
+        miningRunRepository.resetAllSelectedForRecommendation();
+        MiningRun target = optRun.get();
+        target.setSelectedForRecommendation(true);
+        miningRunRepository.save(target);
+        log.info("MiningRunService: Đã kích hoạt MiningRun #{} ({}) làm Active Model cho chức năng kê đơn!",
+                runId, target.getAlgorithm());
+        return true;
     }
 
     public List<MiningRun> getAllRuns() {

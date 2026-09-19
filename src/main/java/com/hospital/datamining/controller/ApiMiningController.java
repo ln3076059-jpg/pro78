@@ -183,4 +183,18 @@ public class ApiMiningController {
 
         return ResponseEntity.ok(comparison);
     }
+
+    /**
+     * POST /api/mining/set-active/{id}
+     * Đặt một MiningRun làm Active Model cho chức năng gợi ý kê đơn thuốc
+     */
+    @PostMapping("/mining/set-active/{id}")
+    public ResponseEntity<?> setActiveMiningRun(@PathVariable("id") Long runId) {
+        boolean success = miningRunService.setActiveMiningRun(runId);
+        if (success) {
+            return ResponseEntity.ok(java.util.Map.of("success", true, "message", "Đã kích hoạt mô hình #" + runId + " làm Active Model thành công!"));
+        } else {
+            return ResponseEntity.badRequest().body(java.util.Map.of("success", false, "message", "Không tìm thấy MiningRun với ID #" + runId));
+        }
+    }
 }

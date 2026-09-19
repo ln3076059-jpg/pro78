@@ -150,9 +150,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 let severityClass = 'bg-warning text-dark';
                 if (rec.interactionSeverity === 'Major') severityClass = 'bg-danger text-white';
                 else if (rec.interactionSeverity === 'Minor') severityClass = 'bg-info text-dark';
-                ddiBadge = `<span class="badge ${severityClass} ms-1" title="${escapeHtml(rec.interactionDescription || '')}"><i class="fas fa-exclamation-circle me-1"></i> FDA DDI: ${escapeHtml(rec.interactionSeverity || 'Known')}</span>`;
+                ddiBadge = `<span class="badge ${severityClass} ms-1" title="${escapeHtml(rec.interactionDescription || '')}"><i class="fas fa-exclamation-circle me-1"></i> DDI Alert: ${escapeHtml(rec.interactionSeverity || 'Known')}</span>`;
             } else if (rec.interactionStatus === 'NOT FOUND') {
-                ddiBadge = `<span class="badge bg-success-subtle text-success border border-success-subtle ms-1" title="Không phát hiện tương tác nghiêm trọng trong FDA DDI"><i class="fas fa-check-circle me-1"></i> DDI: Không cảnh báo</span>`;
+                ddiBadge = `<span class="badge bg-success-subtle text-success border border-success-subtle ms-1" title="Không phát hiện cảnh báo tương tác trong DDI Knowledge Base"><i class="fas fa-check-circle me-1"></i> DDI: Không cảnh báo</span>`;
             }
 
             itemDiv.innerHTML = `

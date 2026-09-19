@@ -167,7 +167,7 @@
                             <ul>
                                 <li><code>encounter_id</code>: Mã định danh đợt điều trị (được xem là Transaction ID).</li>
                                 <li><code>patient_nbr</code>: Mã định danh bệnh nhân duy nhất.</li>
-                                <li><strong>24 cột thuốc tiểu đường:</strong> Metformin, Repaglinide, Glimepiride, Glipizide, Glyburide, Pioglitazone, Rosiglitazone, Acarbose, Insulin, v.v.</li>
+                                <li><strong>23 cột hoạt chất thuốc cụ thể:</strong> Metformin, Repaglinide, Glimepiride, Glipizide, Glyburide, Pioglitazone, Rosiglitazone, Acarbose, Insulin, v.v. (cùng 2 thuộc tính quản lý thuốc: diabetesMed, change).</li>
                                 <li><strong>Quy ước giá trị:</strong> <code>No</code> = không sử dụng; <code>Steady</code>, <code>Up</code>, <code>Down</code> = có sử dụng thuốc trong đợt điều trị.</li>
                                 <li>Chỉ các transaction có <strong>&ge; 2 loại thuốc</strong> được đưa vào bài toán khai phá luật kết hợp chính.</li>
                             </ul>

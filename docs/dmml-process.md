@@ -54,7 +54,7 @@ Dự án được truyền cảm hứng và lấy cơ sở lý thuyết từ cô
 
 ### 3.2. Cấu trúc trường dữ liệu & Định nghĩa Transaction
 * Đơn vị giao dịch (Transaction): Mỗi `encounter_id` được xác định là một transaction đại diện cho một đợt nằm viện.
-* 24 trường thuốc điều trị tiểu đường: `metformin`, `repaglinide`, `nateglinide`, `chlorpropamide`, `glimepiride`, `acetohexamide`, `glipizide`, `glyburide`, `tolbutamide`, `pioglitazone`, `rosiglitazone`, `acarbose`, `miglitol`, `troglitazone`, `tolazamide`, `examide`, `citoglipton`, `insulin`, `glyburide-metformin`, `glipizide-metformin`, `glimepiride-pioglitazone`, `metformin-rosiglitazone`, `metformin-pioglitazone`.
+* 23 trường thuốc điều trị đái tháo đường cụ thể: `metformin`, `repaglinide`, `nateglinide`, `chlorpropamide`, `glimepiride`, `acetohexamide`, `glipizide`, `glyburide`, `tolbutamide`, `pioglitazone`, `rosiglitazone`, `acarbose`, `miglitol`, `troglitazone`, `tolazamide`, `examide`, `citoglipton`, `insulin`, `glyburide-metformin`, `glipizide-metformin`, `glimepiride-pioglitazone`, `metformin-rosiglitazone`, `metformin-pioglitazone` (kèm 2 trường tóm tắt `change` và `diabetesMed`).
 
 ### 3.3. Phân tích Thống kê Dữ liệu (Data Understanding Dashboard)
 Từ việc chạy thực tế trên 101,766 bản ghi:
@@ -128,10 +128,11 @@ Triển khai hai thuật toán khai phá luật kết hợp độc lập thuần
 > Chỉ số $\text{Lift} > 1$ **hoàn toàn KHÔNG đồng nghĩa với việc hai thuốc an toàn khi phối hợp**. $\text{Lift} > 1$ chỉ phản ánh tương quan đồng xuất hiện thống kê trong dữ liệu lịch sử, không chứng minh mối quan hệ nhân quả (causality) hay độ an toàn lâm sàng (clinical safety).
 
 ### 6.2. Kết quả Thực nghiệm & Lựa chọn Thuật toán
-Trên tập dữ liệu đầy đủ 31,049 transactions của UCI Diabetes 130-US Hospitals:
-* Hai thuật toán sinh ra số lượng tập phổ biến và luật kết hợp **trùng khớp 100%** tại mọi ngưỡng $\text{minSupport}$.
-* **FP-Growth vượt trội hoàn toàn về tốc độ thực thi**: Nhanh hơn Apriori từ **3.5 đến 4.2 lần** (ở $\text{minSupport}=0.01$, FP-Growth chỉ mất 81 ms trong khi Apriori mất 339 ms).
-* **Kết luận khoa học**: FP-Growth được lựa chọn làm thuật toán ưu tiên khuyến nghị cho hệ thống nhờ khả năng mở rộng tốt trên tập dữ liệu lớn.
+Trên tập dữ liệu đầy đủ 31,049 transactions của UCI Diabetes 130-US Hospitals (được đo đạc khoa học qua 2 lần warm-up và 5 lần đo chính thức để lấy thời gian trung vị - Median Runtime):
+* Hai thuật toán sinh ra số lượng tập phổ biến và luật kết hợp **tương thích hoàn toàn** (Độ tương đồng Jaccard = 100.0%) tại mọi ngưỡng $\text{minSupport}$.
+* **FP-Growth vượt trội hoàn toàn về tốc độ thực thi**: Nhanh hơn Apriori từ **3.5 đến 4.2 lần** (ở $\text{minSupport}=0.01$, FP-Growth chỉ mất ~83 ms trung vị trong khi Apriori mất ~322 ms).
+* **Khả năng sử dụng bộ nhớ**: FP-Growth tiêu thụ ít heap delta hơn đáng kể nhờ cấu trúc cây nén FP-Tree và không phát sinh tập ứng viên trung gian $C_k$.
+* **Kết luận khoa học**: FP-Growth được khuyến nghị làm thuật toán ưu tiên cho hệ thống và quản trị viên có thể kích hoạt làm **Active Model** cho phân hệ kê đơn.
 
 ---
 
@@ -139,10 +140,10 @@ Trên tập dữ liệu đầy đủ 31,049 transactions của UCI Diabetes 130-
 
 Dự án không dừng lại ở mức phân tích lý thuyết hay vẽ đồ thị tĩnh mà đã **triển khai hoàn chỉnh vào quy trình kê đơn của bác sĩ**:
 1. Bác sĩ mở màn hình khám bệnh, tạo đơn thuốc và chọn thuốc khởi đầu (ví dụ: `Metformin`).
-2. Hệ thống tự động kích hoạt `DrugRecommendationService`:
+2. Hệ thống tự động kích hoạt `DrugRecommendationService` dựa trên **Active Mining Model** đã được lựa chọn:
    * Ưu tiên tìm các luật đa tiền tố (nếu bác sĩ đã chọn nhiều thuốc).
    * Tự động fallback sang các luật đơn tiền tố để đảm bảo độ phủ gợi ý.
    * Lọc bỏ các thuốc đã có trong đơn hiện tại.
    * Sắp xếp danh sách gợi ý theo $\text{Lift} \downarrow$, $\text{Confidence} \downarrow$, $\text{Support} \downarrow$.
-3. Tích hợp kiểm tra tương tác thuốc FDA DDI độc lập qua `DrugInteractionService` để cảnh báo mức độ tương tác nếu có (`Major`, `Moderate`, `Minor`).
-4. Hiển thị thông báo miễn trừ trách nhiệm y khoa bắt buộc để bác sĩ đưa ra quyết định lâm sàng cuối cùng.
+3. Tích hợp kiểm tra tương tác thuốc qua `DrugInteractionService` (sử dụng cơ sở dữ liệu mẫu Demo DDI tham chiếu DailyMed) để cảnh báo mức độ tương tác nếu có (`Major`, `Moderate`, `Minor`).
+4. Hiển thị thông báo miễn trừ trách nhiệm y khoa bắt buộc để bác sĩ đưa ra quyết định lâm sàng cuối cùng (tuyệt đối không tự động kê thuốc vào đơn).

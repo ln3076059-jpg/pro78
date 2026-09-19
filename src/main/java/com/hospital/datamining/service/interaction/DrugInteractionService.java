@@ -11,8 +11,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Service kiểm tra tương tác thuốc (Drug-Drug Interaction - DDI) dựa trên nguồn FDA DDI / DailyMed.
- * Mục 28 đề tài: Tách biệt hoàn toàn giữa đồng xuất hiện (Association Rules) và cảnh báo tương tác (FDA DDI).
+ * Service kiểm tra tương tác thuốc (Drug-Drug Interaction - DDI) dựa trên cơ sở dữ liệu mẫu Demo DDI Knowledge Base.
+ * Tách biệt hoàn toàn giữa đồng xuất hiện (Association Rules) và cảnh báo tương tác thuốc.
  */
 @Service
 public class DrugInteractionService {
@@ -36,7 +36,7 @@ public class DrugInteractionService {
                     .status("UNKNOWN")
                     .severity("None")
                     .description("Tên thuốc không hợp lệ.")
-                    .source("FDA DDI")
+                    .source("Demo DDI Knowledge Base")
                     .build();
         }
 
@@ -49,7 +49,7 @@ public class DrugInteractionService {
                     .status(match.getInteractionStatus() != null ? match.getInteractionStatus() : "KNOWN")
                     .severity(match.getSeverity() != null ? match.getSeverity() : "Moderate")
                     .description(match.getDescription())
-                    .source(match.getSource() != null ? match.getSource() : "FDA DDI")
+                    .source(match.getSource() != null ? match.getSource() : "Demo interaction knowledge base (DailyMed ref)")
                     .build();
         }
 
@@ -58,8 +58,8 @@ public class DrugInteractionService {
                 .drugB(drugB)
                 .status("NOT FOUND")
                 .severity("None")
-                .description("Không ghi nhận tương tác thuốc nghiêm trọng trong cơ sở dữ liệu FDA DDI.")
-                .source("FDA DDI")
+                .description("Không ghi nhận tương tác thuốc nghiêm trọng trong cơ sở dữ liệu mẫu.")
+                .source("Demo DDI Knowledge Base")
                 .build();
     }
 

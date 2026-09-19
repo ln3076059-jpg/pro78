@@ -70,6 +70,14 @@ public class MiningRun {
     @Builder.Default
     private String status = "SUCCESS";
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "dataset_import_id")
+    private DatasetImport datasetImport;
+
+    @Column(name = "selected_for_recommendation", nullable = false)
+    @Builder.Default
+    private Boolean selectedForRecommendation = false;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 

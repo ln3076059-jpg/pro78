@@ -37,9 +37,9 @@ public class DrugInteraction {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Column(length = 100)
+    @Column(length = 150)
     @Builder.Default
-    private String source = "FDA DDI / DailyMed";
+    private String source = "Demo interaction knowledge base (DailyMed ref)";
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;

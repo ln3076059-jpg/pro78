@@ -41,6 +41,7 @@ class DrugRecommendationServiceTest {
     @DisplayName("Kiểm tra gợi ý thuốc khi bác sĩ chọn Aspirin và lọc Lift > 1.0 kèm disclaimer lâm sàng")
     void testDrugRecommendation() {
         MiningRun fakeRun = MiningRun.builder().id(1L).algorithm("APRIORI").status("SUCCESS").build();
+        Mockito.when(miningRunService.getActiveMiningRun()).thenReturn(Optional.of(fakeRun));
         Mockito.when(miningRunService.getLatestSuccessfulRun()).thenReturn(Optional.of(fakeRun));
 
         // Giả lập 2 luật:
@@ -92,6 +93,7 @@ class DrugRecommendationServiceTest {
     @DisplayName("Ưu tiên luật tiền đề đa phần tử {Aspirin, Heparin} -> X trước fallback đơn phần tử (Mục 21 đề bài)")
     void testMultiItemAntecedentPriorityOverSingleItemFallback() {
         MiningRun fakeRun = MiningRun.builder().id(1L).algorithm("FP_GROWTH").status("SUCCESS").build();
+        Mockito.when(miningRunService.getActiveMiningRun()).thenReturn(Optional.of(fakeRun));
         Mockito.when(miningRunService.getLatestSuccessfulRun()).thenReturn(Optional.of(fakeRun));
 
         // Rule 1: {Aspirin, Heparin} -> {Metoprolol} (Tier 1: Multi-item antecedent)

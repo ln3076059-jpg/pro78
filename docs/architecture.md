@@ -139,7 +139,7 @@ com.hospital.datamining/
 2. `DataPreprocessingService` sử dụng Apache Commons CSV theo cơ chế **Streaming Parser**:
    * Đọc từng dòng mà không nạp toàn bộ tệp 19.1 MB vào bộ nhớ RAM cùng lúc.
    * Kiểm tra tính hợp lệ của trường `encounter_id` và `patient_nbr`.
-   * Quét 24 cột thuốc điều trị tiểu đường theo quy ước: `No` = không dùng; `Steady`, `Up`, `Down` = có sử dụng.
+   * Quét 23 cột thuốc điều trị đái tháo đường cụ thể theo quy ước: `No` = không dùng; `Steady`, `Up`, `Down` = có sử dụng (cùng 2 thuộc tính tóm tắt `change` và `diabetesMed`).
    * Tính toán các chỉ số Data Understanding: phân bố nhóm tuổi, top chẩn đoán, số thuốc TB/min/max.
 3. `TransactionBuilderService`:
    * Gom các thuốc có sử dụng theo từng `encounter_id`.
@@ -153,12 +153,13 @@ com.hospital.datamining/
    * **Apriori**: Duyệt theo từng mức $k$ ($C_1 \to L_1 \to C_2 \to L_2 \dots$). Áp dụng tính chất Apriori (mọi tập con của tập phổ biến đều phải là tập phổ biến).
    * **FP-Growth**: Xây dựng cấu trúc cây nén **FP-Tree** qua 2 lượt quét dữ liệu, sau đó khai phá đệ quy trên cây tiền tố điều kiện (Conditional FP-Tree) mà không sinh tập ứng viên.
 3. Cả 2 thuật toán sinh ra danh sách `FrequentItemsetResult` và `AssociationRuleResult`.
-4. `MiningEvaluationService` ghi nhận:
-   * Thời gian thực thi (Runtime in ms).
-   * Bộ nhớ tiêu thụ (Memory in MB).
-   * Số lượng tập phổ biến sinh ra.
-   * Số lượng luật kết hợp thỏa mãn ngưỡng.
-5. `AssociationRuleService` lưu trữ các luật kết hợp vào bảng `association_rules`, phân tách `association_rule_antecedents` và `association_rule_consequents` theo từng khóa ngoại `medicine_id`.
+4. `MiningEvaluationService` áp dụng phương pháp kiểm thử benchmark nhiều lượt khoa học:
+   * 2 lượt warm-up để JVM JIT Compiler tối ưu hóa bytecode và ổn định runtime.
+   * 5 lượt đo chính thức để tính **thời gian chạy trung vị (Median Runtime)**, trung bình (Mean) và độ lệch chuẩn (StdDev).
+   * Đo lường bộ nhớ tiêu thụ xấp xỉ (Approximate JVM Heap Delta qua MemoryMXBean/Runtime).
+   * Đánh giá độ tương thích kết quả thông qua **Jaccard Similarity** ($|A \cap B| / |A \cup B|$) cho cả Frequent Itemsets và Association Rules.
+5. Quản trị viên lựa chọn mô hình hoạt động (**Active Model** - cờ `selected_for_recommendation = true`).
+6. `AssociationRuleService` lưu trữ các luật kết hợp vào bảng `association_rules`, phân tách `association_rule_antecedents` và `association_rule_consequents` theo từng khóa ngoại `medicine_id`.
 
 ### 3.3. Luồng Tích Hợp Kê Đơn Lâm Sàng (Prescription Recommendation Integration)
 ```mermaid

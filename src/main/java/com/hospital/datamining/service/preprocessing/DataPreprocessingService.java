@@ -35,7 +35,8 @@ public class DataPreprocessingService {
 
     private static final Logger log = LoggerFactory.getLogger(DataPreprocessingService.class);
 
-    // 24 cột thuốc chuẩn từ bộ dữ liệu UCI Diabetes 130-US Hospitals
+    // 23 cột thuốc chuẩn hóa cụ thể từ bộ dữ liệu UCI Diabetes 130-US Hospitals
+    // (Bên cạnh 2 thuộc tính quản lý thuốc chung: 'diabetesMed' và 'change')
     public static final List<String> UCI_DRUG_COLUMNS = List.of(
             "metformin", "repaglinide", "nateglinide", "chlorpropamide", "glimepiride",
             "acetohexamide", "glipizide", "glyburide", "tolbutamide", "pioglitazone",

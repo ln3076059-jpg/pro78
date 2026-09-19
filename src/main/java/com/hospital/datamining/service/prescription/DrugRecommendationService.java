@@ -95,14 +95,17 @@ public class DrugRecommendationService {
             return Collections.emptyList();
         }
 
-        // 1. Lấy mô hình khai phá gần nhất
-        Optional<MiningRun> latestRunOpt = miningRunService.getLatestSuccessfulRun();
-        if (latestRunOpt.isEmpty()) {
-            log.warn("Chưa có MiningRun nào được lưu để gợi ý thuốc!");
+        // 1. Lấy mô hình khai phá đang hoạt động (Active Model) được chỉ định cho hệ thống
+        Optional<MiningRun> activeRunOpt = miningRunService.getActiveMiningRun();
+        if (activeRunOpt.isEmpty()) {
+            activeRunOpt = miningRunService.getLatestSuccessfulRun();
+        }
+        if (activeRunOpt.isEmpty()) {
+            log.warn("Chưa có Active MiningRun nào được kích hoạt để gợi ý thuốc!");
             return Collections.emptyList();
         }
 
-        MiningRun run = latestRunOpt.get();
+        MiningRun run = activeRunOpt.get();
 
         // 2. Lấy danh sách luật có confidence cao và lift > 1.0 (Lift > 1 biểu thị đồng xuất hiện tích cực)
         List<AssociationRule> candidateRules = ruleRepository.findTopConfidentRules(run.getId(), 0.10, 1.0);
@@ -114,8 +117,28 @@ public class DrugRecommendationService {
         Map<String, RecommendationResponseDTO> tier2Recommendations = new HashMap<>();
 
         for (AssociationRule rule : candidateRules) {
-            Set<String> ruleAntecedents = parseItems(rule.getAntecedent());
-            Set<String> ruleConsequents = parseItems(rule.getConsequent());
+            // Ưu tiên đọc từ bảng chuẩn hóa association_rule_antecedents và consequents
+            Set<String> ruleAntecedents = new HashSet<>();
+            if (rule.getAntecedents() != null && !rule.getAntecedents().isEmpty()) {
+                for (var ant : rule.getAntecedents()) {
+                    if (ant.getDrugName() != null && !ant.getDrugName().trim().isEmpty()) {
+                        ruleAntecedents.add(ant.getDrugName().trim());
+                    }
+                }
+            } else {
+                ruleAntecedents = parseItems(rule.getAntecedent());
+            }
+
+            Set<String> ruleConsequents = new HashSet<>();
+            if (rule.getConsequents() != null && !rule.getConsequents().isEmpty()) {
+                for (var cons : rule.getConsequents()) {
+                    if (cons.getDrugName() != null && !cons.getDrugName().trim().isEmpty()) {
+                        ruleConsequents.add(cons.getDrugName().trim());
+                    }
+                }
+            } else {
+                ruleConsequents = parseItems(rule.getConsequent());
+            }
 
             boolean isFullSubset = !ruleAntecedents.isEmpty() && containsAllCaseInsensitive(normalizedSelected, ruleAntecedents);
 
@@ -223,7 +246,7 @@ public class DrugRecommendationService {
         } else {
             dto.setInteractionStatus("NOT FOUND");
             dto.setInteractionSeverity("None");
-            dto.setInteractionDescription("Không tìm thấy cảnh báo tương tác trong FDA DDI.");
+            dto.setInteractionDescription("Không tìm thấy cảnh báo tương tác trong cơ sở tri thức tương tác thuốc (DDI Knowledge Base).");
         }
     }
 

@@ -12,6 +12,7 @@ import com.hospital.datamining.service.mining.model.MiningResult;
 import com.hospital.datamining.service.preprocessing.TransactionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -25,6 +26,9 @@ import java.util.Set;
 public class DataInitializer implements CommandLineRunner {
 
     private static final Logger log = LoggerFactory.getLogger(DataInitializer.class);
+
+    @Value("${app.seed.auto-mining:false}")
+    private boolean autoMiningEnabled;
 
     private final RoleRepository roleRepository;
     private final UserRepository userRepository;
@@ -140,7 +144,7 @@ public class DataInitializer implements CommandLineRunner {
             diagnosisRepository.save(Diagnosis.builder().icdCode("585.9").diseaseName("Bệnh thận mạn tính").category("Thận").build());
         }
 
-        // 5. Medicines (Toàn bộ 24 thuốc chuẩn từ UCI Diabetes 130-US Hospitals)
+        // 5. Medicines (23 thuốc chuẩn UCI Diabetes 130-US Hospitals + 3 thuốc phối hợp tim mạch/bệnh nền)
         if (medicineRepository.count() == 0) {
             initMedicine("METFORMIN", "Metformin", "Metformin", "Glucophage", "Viên nén", "500mg", "Uống", "Biguanide - Giảm sản xuất glucose ở gan");
             initMedicine("INSULIN", "Insulin", "Insulin", "Humulin / Lantus", "Bút tiêm / Lọ", "100 IU/ml", "Tiêm dưới da", "Insulin sinh học kiểm soát đường huyết");
@@ -172,15 +176,15 @@ public class DataInitializer implements CommandLineRunner {
             log.info("Đã khởi tạo đầy đủ 26 danh mục thuốc chuẩn hóa!");
         }
 
-        // 6. Drug Interactions (FDA DDI)
+        // 6. Demo Drug Interactions (Cơ sở tri thức tương tác thuốc minh họa)
         if (drugInteractionRepository.count() == 0) {
-            initInteraction("Metformin", "Insulin", "Moderate", "Phối hợp làm tăng hiệu lực hạ đường huyết. Cần theo dõi đường huyết chặt chẽ và điều chỉnh liều insulin phù hợp.", "FDA DDI / DailyMed");
-            initInteraction("Glyburide", "Metformin", "Moderate", "Phối hợp sulfonylurea và biguanide có thể làm tăng nguy cơ hạ đường huyết, đặc biệt khi bỏ bữa.", "FDA DDI / DailyMed");
-            initInteraction("Glipizide", "Insulin", "Major", "Tăng nguy cơ hạ đường huyết nghiêm trọng khi dùng đồng thời sulfonylurea liều cao với insulin ngoại sinh.", "FDA DDI / DailyMed");
-            initInteraction("Repaglinide", "Insulin", "Moderate", "Tăng nguy cơ hạ đường huyết cấp tính do đồng kích thích tiết insulin và bổ sung insulin.", "FDA DDI / DailyMed");
-            initInteraction("Pioglitazone", "Insulin", "Moderate", "Phối hợp TZD với insulin làm tăng nguy cơ giữ dịch phù nề và suy tim sung huyết.", "FDA DDI / DailyMed");
-            initInteraction("Rosiglitazone", "Insulin", "Major", "Chống chỉ định phối hợp ở bệnh nhân có tiền sử suy tim do tăng giữ dịch quá mức.", "FDA DDI / DailyMed");
-            log.info("Đã khởi tạo cơ sở dữ liệu tương tác thuốc FDA DDI!");
+            initInteraction("Metformin", "Insulin", "Moderate", "Phối hợp làm tăng hiệu lực hạ đường huyết. Cần theo dõi đường huyết chặt chẽ và điều chỉnh liều insulin phù hợp.", "Demo interaction knowledge base (DailyMed ref)");
+            initInteraction("Glyburide", "Metformin", "Moderate", "Phối hợp sulfonylurea và biguanide có thể làm tăng nguy cơ hạ đường huyết, đặc biệt khi bỏ bữa.", "Demo interaction knowledge base (DailyMed ref)");
+            initInteraction("Glipizide", "Insulin", "Major", "Tăng nguy cơ hạ đường huyết nghiêm trọng khi dùng đồng thời sulfonylurea liều cao với insulin ngoại sinh.", "Demo interaction knowledge base (DailyMed ref)");
+            initInteraction("Repaglinide", "Insulin", "Moderate", "Tăng nguy cơ hạ đường huyết cấp tính do đồng kích thích tiết insulin và bổ sung insulin.", "Demo interaction knowledge base (DailyMed ref)");
+            initInteraction("Pioglitazone", "Insulin", "Moderate", "Phối hợp TZD với insulin làm tăng nguy cơ giữ dịch phù nề và suy tim sung huyết.", "Demo interaction knowledge base (DailyMed ref)");
+            initInteraction("Rosiglitazone", "Insulin", "Major", "Chống chỉ định phối hợp ở bệnh nhân có tiền sử suy tim do tăng giữ dịch quá mức.", "Demo interaction knowledge base (DailyMed ref)");
+            log.info("Đã khởi tạo cơ sở tri thức tương tác thuốc demo (Demo Drug Interaction Knowledge Base)!");
         }
 
         // 7. Patients
@@ -236,36 +240,40 @@ public class DataInitializer implements CommandLineRunner {
             }
         }
 
-        // 8. Tự động nạp bộ dữ liệu chuẩn UCI Diabetes và Khai phá Luật ban đầu
-        try {
-            log.info("Tự động nạp bộ dữ liệu chuẩn UCI Diabetes 130-US Hospitals (diabetic_data.csv / sample)...");
-            datasetImportService.importUciDiabetesDataset();
+        // 8. Tự động nạp bộ dữ liệu chuẩn UCI Diabetes và Khai phá Luật ban đầu (nếu được kích hoạt)
+        if (autoMiningEnabled) {
+            try {
+                log.info("Cấu hình app.seed.auto-mining=true: Tự động nạp bộ dữ liệu chuẩn UCI Diabetes 130-US Hospitals...");
+                datasetImportService.importUciDiabetesDataset();
 
-            if (transactionService.hasTransactions()) {
-                List<Set<String>> transactions = transactionService.getTransactions();
-                log.info("Đã nạp thành công {} transactions từ dữ liệu UCI Diabetes!", transactions.size());
+                if (transactionService.hasTransactions()) {
+                    List<Set<String>> transactions = transactionService.getTransactions();
+                    log.info("Đã nạp thành công {} transactions từ dữ liệu UCI Diabetes!", transactions.size());
 
-                MiningParameters defaultParams = MiningParameters.builder()
-                        .minSupport(0.01)
-                        .minConfidence(0.30)
-                        .minLift(1.0)
-                        .maxItemsetSize(5)
-                        .build();
+                    MiningParameters defaultParams = MiningParameters.builder()
+                            .minSupport(0.01)
+                            .minConfidence(0.30)
+                            .minLift(1.0)
+                            .maxItemsetSize(5)
+                            .build();
 
-                // 1. Chạy Apriori và lưu kết quả
-                MiningResult aprioriRes = aprioriMiningService.mine(transactions, defaultParams);
-                miningRunService.saveMiningRun(aprioriRes, defaultParams, "UCI Diabetes 130-US Hospitals");
+                    // 1. Chạy Apriori và lưu kết quả
+                    MiningResult aprioriRes = aprioriMiningService.mine(transactions, defaultParams);
+                    miningRunService.saveMiningRun(aprioriRes, defaultParams, "UCI Diabetes 130-US Hospitals");
 
-                // 2. Chạy FP-Growth và lưu kết quả
-                MiningResult fpRes = fpGrowthMiningService.mine(transactions, defaultParams);
-                miningRunService.saveMiningRun(fpRes, defaultParams, "UCI Diabetes 130-US Hospitals");
+                    // 2. Chạy FP-Growth và lưu kết quả
+                    MiningResult fpRes = fpGrowthMiningService.mine(transactions, defaultParams);
+                    miningRunService.saveMiningRun(fpRes, defaultParams, "UCI Diabetes 130-US Hospitals");
 
-                // 3. Chạy Benchmark so sánh
-                miningEvaluationService.runBenchmark(transactions, defaultParams, "UCI Diabetes 130-US Hospitals");
-                log.info("Khởi tạo Data Mining từ bộ dữ liệu UCI Diabetes thành công! Đã có sẵn luật kết hợp cho phân hệ Bác sĩ kê đơn.");
+                    // 3. Chạy Benchmark so sánh
+                    miningEvaluationService.runBenchmark(transactions, defaultParams, "UCI Diabetes 130-US Hospitals");
+                    log.info("Khởi tạo Data Mining tự động thành công!");
+                }
+            } catch (Exception e) {
+                log.warn("Không thể tự động chạy khai phá ban đầu: {}", e.getMessage(), e);
             }
-        } catch (Exception e) {
-            log.warn("Không thể tự động chạy khai phá ban đầu: {}", e.getMessage(), e);
+        } else {
+            log.info("Khởi tạo master data hoàn tất! Chế độ auto-mining tắt (app.seed.auto-mining=false). Các tác vụ Data Mining sẽ thực thi theo yêu cầu trên Admin UI hoặc REST API.");
         }
     }
 

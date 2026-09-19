@@ -4,8 +4,8 @@
 -- File: database/schema.sql
 -- =============================================================================
 
-CREATE DATABASE IF NOT EXISTS hospital_mining_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE hospital_mining_db;
+CREATE DATABASE IF NOT EXISTS hospital_drug_mining CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE hospital_drug_mining;
 
 -- 1. Bảng Roles (Vai trò người dùng)
 CREATE TABLE IF NOT EXISTS roles (
@@ -216,7 +216,11 @@ CREATE TABLE IF NOT EXISTS mining_runs (
     started_at DATETIME,
     finished_at DATETIME,
     status VARCHAR(30) DEFAULT 'SUCCESS',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    dataset_import_id BIGINT,
+    selected_for_recommendation BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_mining_runs_active (selected_for_recommendation),
+    CONSTRAINT fk_mining_runs_import FOREIGN KEY (dataset_import_id) REFERENCES dataset_imports(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 15. Bảng Frequent Itemsets (Tập phổ biến)
@@ -312,7 +316,7 @@ CREATE TABLE IF NOT EXISTS drug_interactions (
     interaction_status VARCHAR(30) DEFAULT 'KNOWN',
     severity VARCHAR(30) DEFAULT 'Moderate',
     description TEXT,
-    source VARCHAR(100) DEFAULT 'FDA DDI / DailyMed',
+    source VARCHAR(150) DEFAULT 'Demo interaction knowledge base (DailyMed ref)',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     INDEX idx_ddi_drugs (drug_name_a, drug_name_b)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

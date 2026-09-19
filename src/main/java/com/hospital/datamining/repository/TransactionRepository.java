@@ -24,4 +24,9 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
 
     @Query("SELECT COUNT(t) FROM Transaction t WHERE t.sourceImportId = :importId")
     long countByImportId(Long importId);
+
+    @org.springframework.data.jpa.repository.Modifying
+    @org.springframework.transaction.annotation.Transactional
+    @Query("DELETE FROM Transaction t WHERE t.sourceImportId = :importId")
+    void deleteBySourceImportId(Long importId);
 }

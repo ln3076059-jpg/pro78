@@ -362,7 +362,7 @@ dataset.path=dataset/diabetic_data.csv
 ```bash
 mvn clean test
 ```
-*(Kết quả: 34 unit & integration tests PASS 100%, không yêu cầu MySQL).*
+*(Kết quả: 34 unit & integration tests PASS 100%, không yêu cầu MySQL. Xem nhật ký kiểm thử chi tiết tại [docs/test-reports.md](docs/test-reports.md)).*
 
 ### Bước 2: Đóng gói dự án thành file JAR thực thi
 ```bash

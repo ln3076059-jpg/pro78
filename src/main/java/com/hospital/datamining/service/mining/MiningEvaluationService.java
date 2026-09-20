@@ -128,7 +128,7 @@ public class MiningEvaluationService {
             itemsetOverlapPercentage = Math.round(((double) intersectItemsets.size() / unionItemsets.size()) * 10000.0) / 100.0;
         }
 
-        boolean itemsetsEquivalent = (itemsetOverlapPercentage >= 95.0) &&
+        boolean itemsetsEquivalent = (Math.abs(itemsetOverlapPercentage - 100.0) < 1e-9) &&
                 (lastAprioriResult != null && lastFpResult != null &&
                 lastAprioriResult.getFrequentItemsetCount() == lastFpResult.getFrequentItemsetCount());
 
@@ -136,7 +136,7 @@ public class MiningEvaluationService {
         String recommendedAlgo;
         String conclusionNotes;
 
-        if (!itemsetsEquivalent || jaccardOverlapPercentage < 95.0) {
+        if (!itemsetsEquivalent || Math.abs(jaccardOverlapPercentage - 100.0) > 1e-9) {
             recommendedAlgo = "CẦN RÀ SOÁT LẠI (DISCREPANCY)";
             conclusionNotes = String.format(
                     "CẢNH BÁO: Phát hiện sự khác biệt giữa hai thuật toán (Độ tương đồng luật Jaccard: %.1f%%, Itemsets Jaccard: %.1f%%, Apriori: %d vs FP-Growth: %d). " +

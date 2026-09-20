@@ -24,5 +24,5 @@ public class MiningParametersDTO {
     private String algorithm = "APRIORI"; // APRIORI, FP_GROWTH, BOTH
 
     @Builder.Default
-    private String datasetSource = "demo-data/PRESCRIPTIONS_sample.csv";
+    private String datasetSource = "dataset/diabetic_data.csv";
 }

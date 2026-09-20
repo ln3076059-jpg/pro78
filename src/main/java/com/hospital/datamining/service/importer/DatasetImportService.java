@@ -38,7 +38,7 @@ public class DatasetImportService {
      * Nạp và tiền xử lý bộ dữ liệu demo rút gọn (2,000 ca điều trị từ UCI Diabetes)
      */
     public PreprocessSummaryDTO importDemoDataset() {
-        File demoFile = findFile(sampleDatasetPath, "dataset/diabetic_data_sample.csv", "demo-data/diabetic_data_sample.csv");
+        File demoFile = findFile(sampleDatasetPath, "dataset/diabetic_data_sample.csv");
 
         if (demoFile == null || !demoFile.exists()) {
             return PreprocessSummaryDTO.builder()

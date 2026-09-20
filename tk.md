@@ -52,13 +52,17 @@ java -jar target\hospital-drug-association-mining-1.0.0.jar --spring.profiles.ac
 
 ### Cách 2: Khởi chạy với Cơ sở Dữ liệu MySQL (XAMPP / MySQL Server)
 
-#### Bước 1: Chuẩn bị CSDL MySQL
-Đảm bảo dịch vụ MySQL đang chạy (ví dụ trên XAMPP cổng 3306), sau đó tạo database và nạp dữ liệu:
+#### Bước 1: Chuẩn bị CSDL MySQL (Nạp nhanh với 1 file duy nhất)
+Đảm bảo dịch vụ MySQL đang chạy (ví dụ trên XAMPP cổng 3306). Thực thi 1 lệnh duy nhất để tự động tạo database, 21 bảng và nạp toàn bộ dữ liệu khởi tạo (tài khoản, 26 thuốc, luật kết hợp, active model, benchmarks):
 ```powershell
-# Tạo database chuẩn
-mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS hospital_drug_mining CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+# Nạp toàn bộ CSDL chỉ với 1 lệnh duy nhất (khuyên dùng):
+mysql -u root -p < database/hospital_drug_mining_full.sql
+```
+*(Nếu dùng XAMPP / phpMyAdmin / MySQL Workbench: Bạn chỉ cần chọn tab **Import** và chọn file [database/hospital_drug_mining_full.sql](file:///d:/.idea/it61/database/hospital_drug_mining_full.sql) rồi nhấn **Go / Execute**).*
 
-# Nạp cấu trúc bảng và dữ liệu mẫu
+*Hoặc nếu muốn nạp theo từng file schema rời:*
+```powershell
+mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS hospital_drug_mining CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 mysql -u root -p hospital_drug_mining < database/schema.sql
 mysql -u root -p hospital_drug_mining < database/sample-data.sql
 ```

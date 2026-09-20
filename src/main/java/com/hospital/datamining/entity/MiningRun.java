@@ -70,6 +70,7 @@ public class MiningRun {
     @Builder.Default
     private String status = "SUCCESS";
 
+    @com.fasterxml.jackson.annotation.JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "dataset_import_id")
     private DatasetImport datasetImport;

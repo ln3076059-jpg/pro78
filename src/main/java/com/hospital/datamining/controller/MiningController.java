@@ -76,6 +76,11 @@ public class MiningController {
         this.itemsetRepository = itemsetRepository;
     }
 
+    @GetMapping({"", "/"})
+    public String index() {
+        return "redirect:/mining/dataset";
+    }
+
     // 1. Quản lý Dataset
     @GetMapping("/dataset")
     public String datasetPage(Model model) {

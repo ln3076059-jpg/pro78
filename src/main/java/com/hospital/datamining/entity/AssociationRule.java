@@ -3,8 +3,8 @@ package com.hospital.datamining.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "association_rules")
@@ -50,15 +50,15 @@ public class AssociationRule {
 
     @OneToMany(mappedBy = "rule", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
-    private List<AssociationRuleItem> items = new ArrayList<>();
+    private Set<AssociationRuleItem> items = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "rule", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
-    private List<AssociationRuleAntecedent> antecedents = new ArrayList<>();
+    private Set<AssociationRuleAntecedent> antecedents = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "rule", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
-    private List<AssociationRuleConsequent> consequents = new ArrayList<>();
+    private Set<AssociationRuleConsequent> consequents = new LinkedHashSet<>();
 
     @PrePersist
     protected void onCreate() {

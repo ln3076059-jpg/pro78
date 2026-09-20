@@ -21,8 +21,8 @@ graph TD
         AuthCtrl[AuthController]
         DashCtrl[DashboardController]
         MiningCtrl[MiningController]
-        PrescCtrl[PrescriptionController]
-        ApiCtrl[MiningApiController / RecommendationApi]
+        PrescCtrl[PrescriptionWebController]
+        ApiCtrl[ApiMiningController / ApiRecommendationController]
     end
 
     subgraph Service Layer - Data Mining & ML
@@ -76,12 +76,11 @@ com.hospital.datamining/
 ├── controller/
 │   ├── AuthController.java              # Đăng nhập, đăng xuất, chuyển hướng người dùng
 │   ├── DashboardController.java         # Thống kê tổng quan, biểu đồ Chart.js
-│   ├── DatasetController.java           # Quản lý nhập file CSV và thống kê Data Understanding
+│   ├── HospitalWebController.java       # Quản lý điều hướng, thông tin bệnh viện
 │   ├── MiningController.java            # Khởi chạy Apriori, FP-Growth, xem luật, benchmark
-│   ├── PrescriptionController.java      # Giao diện kê đơn của bác sĩ, gợi ý thuốc
-│   └── api/
-│       ├── MiningApiController.java     # REST API khai phá dữ liệu
-│       └── RecommendationApiController.java # REST API gợi ý thuốc theo thời gian thực
+│   ├── PrescriptionWebController.java   # Giao diện kê đơn của bác sĩ, gợi ý thuốc
+│   ├── ApiMiningController.java         # REST API khai phá dữ liệu
+│   └── ApiRecommendationController.java # REST API gợi ý thuốc theo thời gian thực
 ├── dto/
 │   ├── AssociationRuleDTO.java          # Truyền tải thông tin luật kết hợp
 │   ├── BenchmarkComparisonDTO.java      # So sánh hiệu năng Apriori vs FP-Growth

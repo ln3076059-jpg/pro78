@@ -7,7 +7,7 @@
 **Ứng dụng kỹ thuật khai phá luật kết hợp tích hợp vào hệ thống quản lý bệnh viện trên công nghệ Java để giải quyết bài toán kết hợp thuốc điều trị**
 
 * **Môn học**: Nhập môn Khai phá Dữ liệu và Máy học (Introduction to Data Mining and Machine Learning)
-* **Công nghệ nền tảng**: Java 17 / 21, Spring Boot 3.3.4, Spring MVC, Spring Data JPA, Spring Security 6, Thymeleaf, Bootstrap 5, MySQL, H2 Database, Maven, JUnit 5, Chart.js.
+* **Công nghệ nền tảng**: Java 17 (được kiểm thử trên JDK 21 với compiler release 17), Spring Boot 3.3.4, Spring MVC, Spring Data JPA, Spring Security 6, Thymeleaf, Bootstrap 5, MySQL, H2 Database, Maven, JUnit 5, Chart.js.
 * **Môi trường thực thi**: **100% thuần Java Runtime** (Không sử dụng Python runtime, không gọi Python script từ Spring Boot, không sử dụng API AI/LLM bên ngoài để giả lập).
 
 ---
@@ -260,7 +260,7 @@ CSDL MySQL đồng nhất tên **`hospital_drug_mining`** gồm 21 bảng đư�
 
 Mô hình phân tầng chuẩn mực:
 * **Presentation Layer**: Thymeleaf, HTML5/CSS3, Bootstrap 5, Chart.js tương tác không đồng bộ (AJAX Fetch API).
-* **Controller Layer**: Xử lý Web MVC và REST API (`MiningApiController`, `RecommendationApiController`, `GlobalExceptionHandler`).
+* **Controller Layer**: Xử lý Web MVC và REST API (`ApiMiningController`, `ApiRecommendationController`, `GlobalExceptionHandler`).
 * **Service Layer**: Tách biệt rõ giữa phân hệ Khai phá Dữ liệu (`com.hospital.datamining.service.mining.*`) và phân hệ Nghiệp vụ Lâm sàng (`com.hospital.datamining.service.prescription.*`).
 * **Persistence Layer**: Spring Data JPA & Hibernate kết nối MySQL hoặc H2 in-memory mode.
 
